@@ -24,7 +24,7 @@ st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_ico
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
-# CONFIGURACIÓN DE BASE DE DATOS ULTRA-ESTABLE EN MEMORIA VIVA (ANTI-BLOQUEOS DE LA NUBE)
+# CONFIGURACIÓN DE BASE DE DATOS ULTRA-ESTABLE EN MEMORIA VIVA
 if "base_datos_federal" not in st.session_state:
     st.session_state["base_datos_federal"] = []
 
@@ -66,9 +66,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    
-                    # CORRECCIÓN DEFINITIVA DE MATRIZ: Extraemos el valor flotante limpio rompiendo las cajas de corchetes
-                    porcentaje = float(similitud[0][0]) * 100
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -84,16 +82,16 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # ENLACE NATIVO OFICIAL: Integrado directamente sin scripts HTML raros para saltar bloqueos
+                    # CORRECCIÓN MAESTRA DE ENLACE: Reemplazado por wa.me con barra diagonal limpia sin guiones raros
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
-                    url_whatsapp = f"https://whatsapp.com{numero_match}&text={mensaje_whatsapp}"
+                    url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
                     st.markdown(f'<h3>📱 Contactar al responsable:</h3>', unsafe_allow_html=True)
                     st.write(f"Número del dueño: +{numero_match}")
                     st.link_button("💬 CHATEAR DIRECTO POR WHATSAPP", url_whatsapp)
                     st.write("") 
                     
-                    # DESPLIEGUE FORZADO DE IMAGEN DESDE CLOUDINARY REAL
+                    # DESPLIEGUE DIRECTO NATIVO DE LA IMAGEN DE CLOUDINARY
                     url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
                     if "http" in str(url_foto_match):
                         st.image(str(url_foto_match), caption="Foto oficial de la mascota en el reporte nacional", use_container_width=True)
@@ -117,7 +115,6 @@ telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, 
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
-        # Formateador internacional estricto 549 para WhatsApp
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
         if num_limpio.startswith("0"):
             num_limpio = num_limpio[1:]
@@ -150,7 +147,6 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
             
             fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
             
-            # Sincronización oficial del huso horario de Argentina (-3 horas de la nube)
             hora_argentina = datetime.now() - timedelta(hours=3)
             fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
             
@@ -193,9 +189,10 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
+            # CORRECCIÓN ENLACE EN GALERÍA TAMBIÉN
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
-            url_gal = f"https://whatsapp.com{num_destino}&text={msg_gal}"
+            url_gal = f"https://wa.me{num_destino}?text={msg_gal}"
             
             st.write(f"WhatsApp: +{num_destino}")
             st.link_button("💬 Hablar por WhatsApp", url_gal)
@@ -203,3 +200,7 @@ else:
 
 st.divider()
 
+# --- 4️⃣ SECCIÓN DE DONACIONES ---
+st.header("💝 Apoyá a Misión Mascotas")
+st.write("Tu donación nos ayuda a mantener los servidores online las 24 horas.")
+st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
