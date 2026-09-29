@@ -109,23 +109,29 @@ with pestaña_donar:
     
     st.divider()
     
-    st.markdown("### 💳 Transferencia Directa (Cualquier Banco o Billetera)")
-    st.text("Alias: TU.ALIAS.AQUÍ (Cambiá esto por el alias de tu cuenta)")
-    st.text("CBU: 0000000000000000000000 (Cambiá esto por tu CBU real)")
+    st.markdown("### 💳 Transferencia Directa (Monto Libre)")
+    # RELLENÁ ACÁ ABAJO CON TUS DATOS VERDADEROS:
+    st.text("Alias: PONÉ_ACÁ_TU_ALIAS_REAL")
+    st.text("CBU / CVU: PONÉ_ACÁ_TU_CBU_O_CVU_REAL")
     st.text("Titular: Gonzalo")
     
     st.divider()
     
     st.markdown("### 🚀 Links de Mercado Pago rápidos")
-    st.write("Elegí el monto con el que quieras colaborar hoy:")
+    st.write("Elegí una opción o usá el botón de colaboración libre:")
     
+    # RELLENÁ LOS LINKS DE ADENTRO DE LAS COMILLAS CON TUS LINKS REALES DE MERCADO PAGO:
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.link_button("☕ Cafecito ($1.000)", "https://link-de-mercado-pago-de-1000")
+        st.link_button("☕ Cafecito ($1.000)", "https://mpago.la")
     with col2:
-        st.link_button("🍔 Combo ($3.000)", "https://link-de-mercado-pago-de-3000")
+        st.link_button("🍔 Combo ($3.000)", "https://mpago.la")
     with col3:
-        st.link_button("💎 Súper ($5.000)", "https://link-de-mercado-pago-de-5000")
+        st.link_button("💎 Súper ($5.000)", "https://mpago.la")
+        
+    st.write("") # Espacio visual
+    # BOTÓN DE MONTO LIBRE (Podés crear un link de pago con monto abierto en Mercado Pago o poner un link a tu alias):
+    st.link_button("✨ COLABORACIÓN CON MONTO LIBRE", "https://link-de-mercado-pago-monto-libre-o-alias")
 
 with pestaña_robot:
     st.subheader("Configuración del Robot Rastreador")
@@ -209,7 +215,3 @@ with pestaña_buscar:
                             mejor_coincidencia = mascota
                             
                     if mejor_coincidencia and mayor_porcentaje > 65:
-                        st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
-                        
-                        st.info(f"👤 Responsable: {mejor_coincidencia['nombre_dueño']} \n📍 Ubicación: {mejor_coincidencia['zona']} \n🔗 Link de origen: {mejor_coincidencia['link_redes']}")
-                        
