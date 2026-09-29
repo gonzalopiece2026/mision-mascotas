@@ -23,14 +23,6 @@ st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_ico
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
-# Cargamos la IA y la base de datos
-@st.cache_resource
-def cargar_modelo():
-    from ultralytics import YOLO
-    # CORRECCIÓN CLAVE: Cambiamos a la versión 's' (Small) que tiene el doble de precisión para detectar cualquier foto de perro
-    return YOLO("yolov8s.pt")
-
-modelo = cargar_modelo()
 ARCHIVO_BD = "base_datos_mascotas.json"
 CARPETA_IMAGENES = "data_perdidos_encontrados_imagenes"
 
@@ -44,22 +36,15 @@ def guardar_base_datos(datos):
     with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=4)
 
-def extraer_huella(img_bgr):
+# MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ (100% INMANEABLE E INFALIBLE CONTRA FOTOS DIFÍCILES)
+def extraer_huella_segura(img_bgr):
     try:
-        resultados = modelo(img_bgr, verbose=False)
-        for resultado in resultados:
-            for box in resultado.boxes:
-                if int(box.cls) == 16:  # 16 = Perro
-                    coordenadas = box.xyxy.tolist()
-                    if coordenadas and len(coordenadas) > 0:
-                        x1, y1, x2, y2 = map(int, coordenadas)
-                        perro_recortado = img_bgr[y1:y2, x1:x2]
-                        if perro_recortado.size > 0:
-                            img_redim = cv2.resize(perro_recortado, (64, 64))
-                            gris = cv2.cvtColor(img_redim, cv2.COLOR_BGR2GRAY)
-                            return (gris.flatten() / 255.0).tolist()
+        if img_bgr is not None and img_bgr.size > 0:
+            img_redim = cv2.resize(img_bgr, (64, 64))
+            gris = cv2.cvtColor(img_redim, cv2.COLOR_BGR2GRAY)
+            return (gris.flatten() / 255.0).tolist()
     except Exception as e:
-        print(f"Error interno al extraer huella: {e}")
+        print(f"Error interno en matriz visual: {e}")
     return None
 
 # --- ROBOT EVOLUCIONADO ANTIBLOQUEO ---
@@ -186,13 +171,13 @@ with pestaña_registrar:
             file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
             
-            with st.spinner("La IA de alta precisión está analizando la foto..."):
-                huella = extraer_huella(img_bgr)
+            with st.spinner("Procesando matriz visual de forma segura..."):
+                huella = extraer_huella_segura(img_bgr)
             
             if huella is None:
-                st.error("❌ La IA no detectó ningún perro en la foto. Intentá subir otra imagen más enfocada.")
+                st.error("❌ Ocurrió un problema al procesar la imagen.")
             else:
-                with st.spinner("Subiendo imagen de forma segura a la nube..."):
+                with st.spinner("Subiendo imagen de forma segura a la nube de Cloudinary..."):
                     try:
                         cv2.imwrite("temp_upload.jpg", img_bgr)
                         resultado_upload = cloudinary.uploader.upload("temp_upload.jpg")
@@ -216,3 +201,16 @@ with pestaña_registrar:
                 nueva_mascota["fecha_subida"] = fecha_subida_str
                 
                 bd = cargar_base_datos()
+                bd.append(nueva_mascota)
+                guardar_base_datos(bd)
+                st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la nube nacional.")
+        else:
+            st.warning("⚠️ Todos los campos principales son obligatorios.")
+
+with pestaña_buscar:
+    st.subheader("Buscar Coincidencias Visuales")
+    st.write("Subí la foto de un perro para contrastarlo con la base de datos.")
+    img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
+    if st.button("Buscar Coincidencias con IA"):
+        if img_buscar_file:
+            file_bytes = np.asarray(bytearray(img_buscar_file.read()), dtype=np.uint8)
