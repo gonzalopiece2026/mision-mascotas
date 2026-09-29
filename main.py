@@ -91,19 +91,12 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                     st.info(f"👤 Responsable: {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 Lugar del hecho: {mejor_coincidencia.get('zona', 'No especificada')} \n📅 Fecha: {mejor_coincidencia.get('fecha_hecho', 'No especificada')}")
                     
-                    # LINK HTML BLINDADO: Abre en la misma pestaña de forma nativa para que ningún navegador active bloqueadores
+                    # LINK HTML LIMPIO EN UN SOLO RENGLÓN: Elimina las comillas triples para evitar SyntaxError
                     numero_match = mejor_coincidencia.get('contacto', '')
                     mensaje_whatsapp = urllib.parse.quote("¡Hola! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://whatsapp.com{numero_match}&text={mensaje_whatsapp}"
                     
-                    # Creamos el botón en HTML nativo súper vistoso y seguro
-                    boton_html = f"""
-                    <a href="{url_whatsapp}" style="text-decoration:none;">
-                        <div style="background-color:#25d366; color:white; padding:12px 20px; text-align:center; border-radius:8px; font-weight:bold; font-family:sans-serif; margin-bottom:15px; font-size:16px;">
-                            💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO
-                        </div>
-                    </a>
-                    """
+                    boton_html = f'<a href="{url_whatsapp}" style="text-decoration:none;"><div style="background-color:#25d366; color:white; padding:12px 20px; text-align:center; border-radius:8px; font-weight:bold; font-family:sans-serif; margin-bottom:15px; font-size:16px;">💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO</div></a>'
                     st.markdown(boton_html, unsafe_allow_html=True)
                     st.write("") 
                     
@@ -205,9 +198,8 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
-            # LINK HTML EN GALERÍA TAMBIÉN
+            # BOTÓN DE GALERÍA CORREGIDO: En un solo renglón limpio libre de errores de sintaxis
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
             url_gal = f"https://whatsapp.com{num_destino}&text={msg_gal}"
             
-            boton_galeria_html = f"""
