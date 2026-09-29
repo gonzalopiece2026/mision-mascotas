@@ -24,8 +24,8 @@ st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_ico
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
-# INICIALIZACIÓN DE LA BASE DE DATOS AUTÓNOMA EN MEMORIA VIVA (ANTI-TRABAS DE ARCHIVOS)
-if "bd_mascotas_memoria" not_in st.session_state:
+# CORRECCIÓN MAESTRA: Cambiado 'not_in' por la sintaxis reglamentaria 'not in' separada para evitar SyntaxError
+if "bd_mascotas_memoria" not in st.session_state:
     st.session_state["bd_mascotas_memoria"] = []
 
 # MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ NATIVA (INFALIBLE)
@@ -66,7 +66,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(similitud[0][0]) * 100
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -82,7 +82,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # LINK DIRECTO OFICIAL SIN COMPONENTES RAROS: 100% compatible con todos los celulares y PCs
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://whatsapp.com{numero_match}&text={mensaje_whatsapp}"
                     
