@@ -73,7 +73,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción lineal nativa de la matriz
+                    # Extracción lineal aplanada de NumPy nativa
                     valor_plano = float(np.ravel(similitud))
                     porcentaje = valor_plano * 100
                     
@@ -88,15 +88,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     cartel_tipo = "🔴 ALERTA: PERDIDO" if tipo_match == "Perdido" else "🟢 ALERTA: ENCONTRADO"
                     
                     st.markdown(f"### {cartel_tipo}")
-                    st.info(f"""
-                    👤 **Responsable:** {mejor_coincidencia.get('nombre_dueño', 'Anónimo')}
-                    📍 **Lugar del hecho:** {mejor_coincidencia.get('zona', 'No especificado')}
-                    📅 **Fecha del suceso:** {mejor_coincidencia.get('fecha_hecho', 'No especificada')}
-                    
-                    🐾 **Nombre de la mascota:** {mejor_coincidencia.get('nombre_perro', 'No especificado')}
-                    🐕 **Raza / Color:** {mejor_coincidencia.get('raza', 'No especificada')} | {mejor_coincidencia.get('color', 'No especificado')}
-                    📝 **Detalles particulares:** {mejor_coincidencia.get('detalles', 'Sin detalles adicionales')}
-                    """)
+                    st.info(f"👤 **Responsable:** {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {mejor_coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {mejor_coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {mejor_coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {mejor_coincidencia.get('raza', 'No especificada')} | {mejor_coincidencia.get('color', 'No especificado')} \n📝 **Detalles particulares:** {mejor_coincidencia.get('detalles', 'Sin detalles adicionales')}")
                     
                     # CONTACTO MANUAL INDESTRUCTIBLE
                     numero_match = mejor_coincidencia.get('contacto', '')
@@ -107,14 +99,12 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     # RENDERIZADO EN BASE64 PARA EL MATCH
                     foto_b64 = mejor_coincidencia.get('ruta_imagen', '')
-                    if foto_b64 and foto_b64 != "error" and "http" not in str(foto_b64):
+                    if foto_b64 and foto_b64 != "error":
                         try:
                             bytes_decor = base64.b64decode(foto_b64)
                             st.image(bytes_decor, caption="Foto oficial del cruce inteligente", use_container_width=True)
                         except:
-                            st.warning("📷 Formato de imagen no compatible.")
-                    else:
-                        st.warning("📷 La foto de este registro no está disponible.")
+                            st.text("📷 Foto no compatible")
                 else:
                     st.error("❌ No se encontraron coincidencias similares en el sistema.")
     else:
@@ -203,6 +193,14 @@ else:
         col_img, col_info = st.columns(2)
         with col_img:
             foto_gal_b64 = mascara.get("ruta_imagen", "")
-            if foto_gal_b64 and foto_gal_b64 != "error" and "http" not in str(foto_gal_b64):
+            if foto_gal_b64 and foto_gal_b64 != "error":
                 try:
                     bytes_gal = base64.b64decode(foto_gal_b64)
+                    st.image(bytes_gal, width=150)
+                except:
+                    st.text("📷 Foto no disponible")
+            else:
+                st.text("📷 Registro antiguo no disponible")
+        with col_info:
+            t_alerta = mascara.get('tipo_alerta', 'Perdido')
+            cartel_galeria = "🔴 PERDIDO" if t_alerta == "Perdido" else "🟢 ENCONTRADO"
