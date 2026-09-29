@@ -110,25 +110,27 @@ with pestaña_donar:
     st.divider()
     
     st.markdown("### 💳 Transferencia Directa (Monto Libre)")
-    st.text("Alias: PONÉ_ACÁ_TU_ALIAS_REAL")
-    st.text("CBU / CVU: PONÉ_ACÁ_TU_CBU_O_CVU_REAL")
+    # Cuando quieras podés cambiar estos dos renglones por tu Alias y CBU reales del banco
+    st.text("Alias: TU.ALIAS.REAL.AQUÍ")
+    st.text("CBU / CVU: 0000000000000000000000")
     st.text("Titular: Gonzalo")
     
     st.divider()
     
     st.markdown("### 🚀 Links de Mercado Pago rápidos")
-    st.write("Elegí una opción o usá el botón de colaboración libre:")
+    st.write("Elegí una opción rápida o usá el botón de colaboración libre:");
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.link_button("☕ Cafecito ($1.000)", "https://mpago.la")
+        st.link_button("☕ Cafecito ($1.000)", "https://link-de-mercado-pago-de-1000")
     with col2:
-        st.link_button("🍔 Combo ($3.000)", "https://mpago.la")
+        st.link_button("🍔 Combo ($3.000)", "https://link-de-mercado-pago-de-3000")
     with col3:
-        st.link_button("💎 Súper ($5.000)", "https://mpago.la")
+        st.link_button("💎 Súper ($5.000)", "https://link-de-mercado-pago-de-5000")
         
     st.write("") 
-    st.link_button("✨ COLABORACIÓN CON MONTO LIBRE", "https://link-de-mercado-pago-monto-libre-o-alias")
+    # ¡BOTÓN INTEGRADO CON TU LINK OFICIAL DE MONTO LIBRE!
+    st.link_button("✨ COLABORACIÓN CON MONTO LIBRE", "https://link.mercadopago.com.ar/misionmascotas")
 
 with pestaña_robot:
     st.subheader("Configuración del Robot Rastreador")
@@ -206,7 +208,7 @@ with pestaña_buscar:
                         vector_u = np.array(huella_usuario).reshape(1, -1)
                         similitud = cosine_similarity(vector_u, huella_db)
                         
-                        porcentaje = float(similitud[0][0]) * 100
+                        porcentaje = float(similitud) * 100
                         if porcentaje > mayor_porcentaje:
                             mayor_porcentaje = porcentaje
                             mejor_coincidencia = mascota
