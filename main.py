@@ -73,7 +73,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción matemática nativa libre de errores de array
+                    # Extracción lineal nativa de la matriz de Scikit-Learn
                     porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
@@ -115,7 +115,7 @@ st.divider()
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
-# CASILLEROS COMUNITARIOS COMPLETOS FIJOS
+# CASILLEROS COMUNITARIOS COMPLETOS FIJOS EN PANTALLA
 tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
 img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
 nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
@@ -182,19 +182,18 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL (FORMATO DE PANTALLA DE TELEVISIÓN FIJA) ---
+# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL (FORMATO PIZARRA VERTICAL TIPO TELEVISIÓN) ---
 st.header("🖼️ Galería Nacional de Mascotas Alertas")
 bd = cargar_base_datos()
 if not bd:
     st.info("📭 No hay alertas registradas en este momento. Las nuevas aparecerán acá.")
 else:
     for mascara in reversed(bd):
-        # Creamos una tarjeta destacada fija tipo recuadro de noticiero
+        # Cada registro se clava en un contenedor gris fijo indestructible
         with st.container(border=True):
             t_alerta = mascara.get('tipo_alerta', 'Perdido')
             cartel_galeria = "🔴 MASCOTA PERDIDA" if t_alerta == "Perdido" else "🟢 MASCOTA ENCONTRADA"
             st.markdown(f"## {cartel_galeria}")
             
-            col_info, col_img = st.columns([3, 2])
-            with col_info:
-                st.markdown(f"**🐾 Nombre:** {mascara.get('nombre_perro', 'No especificado')}")
+            # Imprimimos toda la ficha técnica fija arriba de forma obligatoria
+            st.markdown(f"**🐾 Nombre de la mascota:** {mascara.get('nombre_perro', 'No especificado')}")
