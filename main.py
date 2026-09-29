@@ -97,15 +97,13 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # LINK DE COPIA TRADICIONAL COMPATIBLE CON TODOS LOS SERVIDORES
+                    # LINK DIRECTO EN LA MISMA PESTAÑA: 100% compatible y anti bloqueos
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
-                    link_final_wa = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
+                    url_whatsapp = f"https://whatsapp.com{numero_match}&text={mensaje_whatsapp}"
                     
-                    st.subheader("📱 Datos de Contacto Directo")
-                    st.code(f"Número del dueño: +{numero_match}", language="text")
-                    
-                    # Cuadro de texto nativo infalible que permite copiar el link sin trabar la app
-                    st.text_input("🔗 Enlace directo de chat (Copialo y pegalo en tu navegador):", value=link_final_wa)
+                    st.markdown(f'<h3>📱 Contactar al responsable:</h3>', unsafe_allow_html=True)
+                    st.write(f"Número del dueño: +{numero_match}")
+                    st.page_link(url_whatsapp, label="💬 CHATEAR DIRECTO POR WHATSAPP", icon="💬")
                     st.write("") 
                     
                     # DESPLIEGUE DIRECTO NATIVO DE LA IMAGEN DE CLOUDINARY
@@ -168,11 +166,12 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
             hora_argentina = datetime.now() - timedelta(hours=3)
             fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
             
+            # CORRECCIÓN EN EL DICCIONARIO: Guardamos de forma explícita la URL real de Cloudinary de internet
             nueva_mascota = {
                 "nombre_dueño": nombre_rescatista,
                 "zona": lugar_hecho,
                 "contacto": num_limpio,
-                "ruta_imagen": ruta_foto_cloudinary,
+                "ruta_imagen": str(ruta_foto_cloudinary),
                 "huella": huella,
                 "fecha_hecho": fecha_hecho_str,
                 "fecha_subida": fecha_subida_str
