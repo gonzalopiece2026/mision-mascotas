@@ -32,21 +32,22 @@ st.markdown("""
         font-size: 1.05rem;
         margin-bottom: 2rem;
     }
-    /* Estilo para ajustar las pestañas y que no se corten */
+    /* Estilo para ajustar las pestañas y que entren PERFECTAMENTE sin cortarse */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 5px;
         justify-content: center;
         display: flex;
-        flex-wrap: wrap;
+        width: 100% !important;
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #ffffff;
-        border-radius: 20px;
-        padding: 8px 16px;
+        border-radius: 15px;
+        padding: 6px 10px !important; /* Achicamos el margen interno al mínimo */
         border: 1px solid #e5e7eb;
-        font-weight: 600;
+        font-weight: bold;
         color: #4b5563;
-        font-size: 0.9rem;
+        font-size: 0.78rem !important; /* Letra más chica para asegurar que entre todo */
+        white-space: nowrap;
     }
     .stTabs [aria-selected="true"] {
         background-color: #2563eb !important;
@@ -124,11 +125,9 @@ def extraer_huella(img_bgr):
 # --- ROBOT EVOLUCIONADO ANTIBLOQUEO ---
 async def ejecutar_robot_global(palabra_clave):
     os.makedirs(CARPETA_IMAGENES, exist_ok=True)
-    
     query_busqueda = f"{palabra_clave} site:facebook.com"
     texto_seguro = urllib.parse.quote(query_busqueda)
     link_global = f"https://google.com{texto_seguro}&tbm=isch"
-    
     contador = 0
     headers_simulados = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -136,66 +135,57 @@ async def ejecutar_robot_global(palabra_clave):
         'Accept-Language': 'es-ES,es;q=0.9',
         'Referer': 'https://google.com'
     }
-    
     try:
         session = requests.Session()
         response = session.get(link_global, headers=headers_simulados, timeout=10)
         if response.status_code != 200:
             return -1
         html = response.text
-        
         pos = 0
         while True:
             pos = html.find('src="https://encrypted', pos)
             if pos == -1 or contador >= 5:
                 break
-                
             start = html.find('https://', pos)
             end = html.find('"', start)
             src = html[start:end]
-            
             if src:
                 try:
                     contador += 1
                     nombre_archivo = f"robot_global_{contador}.jpg"
                     ruta_completa = os.path.join(CARPETA_IMAGENES, nombre_archivo)
-                    
                     img_data = session.get(src, headers=headers_simulados, timeout=5).content
                     with open(ruta_completa, "wb") as f:
                         f.write(img_data)
                 except:
                     contador -= 1
-                    
             pos = end
         return contador
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA CORREGIDA ---
+# --- INTERFAZ GRÁFICA ULTRA COMPACTA (Nombres súper cortos para que entren siempre) ---
 pestaña_buscar, pestaña_registrar, pestaña_robot = st.tabs([
-    "🔎 BUSCAR COINCIDENCIA", 
-    "📝 CREAR ALERTA", 
-    "🤖 ROBOT RASTREADOR"
+    "🔎 BUSCAR", 
+    "📝 ALERTA", 
+    "🤖 ROBOT"
 ])
 
 with pestaña_robot:
     st.subheader("Configuración del Robot Rastreador")
     st.write("Escribí qué querés que el robot busque en internet (ej: perro perdido Moreno, perrito extraviado Avellaneda).")
-    
     termino_busqueda = st.text_input("Palabras clave de búsqueda:", value="perro perdido Moreno")
-    
     if st.button("🚀 INICIAR RASTREO INTELIGENTE"):
         with st.spinner("El robot está buscando imágenes públicas en la red... Esperá unos segundos."):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             fotos_bajadas = loop.run_until_complete(ejecutar_robot_global(termino_busqueda))
-            
         if fotos_bajadas == -1:
             st.error("❌ Ocurrió un problema de red al procesar la solicitud.")
         elif fotos_bajadas == 0:
             st.warning("⚠️ No se pudieron extraer imágenes en este intento. Probá afinando o cambiando las palabras clave.")
         else:
-            st.success(f"🤖 ¡Robot finalizado con éxito! Se completó el rastreo y se descargaron {fotos_bajadas} fotos nuevas en la base de datos temporal.")
+            st.success(f"🤖 ¡Robot finalizado con éxito! Se completó el rastreo y se descargaron {fotos_bajadas} fotos nuevas.")
 
 with pestaña_registrar:
     st.subheader("Registrar Alerta de Mascota")
@@ -205,22 +195,18 @@ with pestaña_registrar:
     zona = st.text_input("Provincia / Localidad / Barrio (Ej: Moreno, Buenos Aires)")
     contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
     link = st.text_input("Link de la Publicación (Opcional)")
-    
     if st.button("Guardar en la Red Nacional"):
         if img_file and nombre and zona and contacto:
             contacto_limpio = "".join(filter(str.isdigit, contacto))
-            
             file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
             huella = extraer_huella(img_bgr)
-            
             if huella is None:
                 st.error("❌ La IA no detectó ningún perro en la foto. Intentá con otra imagen más clara.")
             else:
                 os.makedirs("fotos_registradas", exist_ok=True)
                 ruta_foto = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
                 cv2.imwrite(ruta_foto, img_bgr)
-                
                 bd = cargar_base_datos()
                 bd.append({
                     "nombre_dueño": nombre, "zona": zona, "contacto": contacto_limpio,
@@ -234,15 +220,13 @@ with pestaña_registrar:
 
 with pestaña_buscar:
     st.subheader("Buscar Coincidencias Visuales")
-    st.write("Subí la foto de un perro que hayas encontrado en la calle o que estés buscando para contrastarlo con la base de datos.")
+    st.write("Subí la foto de un perro para contrastarlo con la base de datos.")
     img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
-    
     if st.button("Buscar Coincidencias con IA"):
         if img_buscar_file:
             file_bytes = np.asarray(bytearray(img_buscar_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
             huella_usuario = extraer_huella(img_bgr)
-            
             if huella_usuario is None:
                 st.error("❌ La IA no pudo detectar un perro en esta foto.")
             else:
@@ -252,6 +236,7 @@ with pestaña_buscar:
                 else:
                     mejor_coincidencia = None
                     mayor_porcentaje = 0.0
-                    
                     for mascota in bd:
                         huella_db = np.array(mascota["huella"]).reshape(1, -1)
+                        vector_u = np.array(huella_usuario).reshape(1, -1)
+                        similitud = cosine_similarity(vector_u, huella_db)
