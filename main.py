@@ -35,16 +35,21 @@ def guardar_base_datos(datos):
         json.dump(datos, f, ensure_ascii=False, indent=4)
 
 def extraer_huella(img_bgr):
-    resultados = modelo(img_bgr, verbose=False)
-    for resultado in resultados:
-        for box in resultado.boxes:
-            if int(box.cls) == 16:  # 16 = Perro
-                coordenadas = box.xyxy.tolist()
-                x1, y1, x2, y2 = map(int, coordenadas)
-                perro_recortado = img_bgr[y1:y2, x1:x2]
-                img_redim = cv2.resize(perro_recortado, (64, 64))
-                gris = cv2.cvtColor(img_redim, cv2.COLOR_BGR2GRAY)
-                return (gris.flatten() / 255.0).tolist()
+    try:
+        resultados = modelo(img_bgr, verbose=False)
+        for resultado in resultados:
+            for box in resultado.boxes:
+                if int(box.cls) == 16:  # 16 = Perro
+                    coordenadas = box.xyxy.tolist()
+                    if coordenadas and len(coordenadas) > 0:
+                        x1, y1, x2, y2 = map(int, coordenadas[0])
+                        perro_recortado = img_bgr[y1:y2, x1:x2]
+                        if perro_recortado.size > 0:
+                            img_redim = cv2.resize(perro_recortado, (64, 64))
+                            gris = cv2.cvtColor(img_redim, cv2.COLOR_BGR2GRAY)
+                            return (gris.flatten() / 255.0).tolist()
+    except Exception as e:
+        print(f"Error interno al extraer huella: {e}")
     return None
 
 # --- ROBOT EVOLUCIONADO ANTIBLOQUEO ---
@@ -89,7 +94,7 @@ async def ejecutar_robot_global(palabra_clave):
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA NATIVA ULTRA COMPACTA (Evita errores de ocultamiento) ---
+# --- INTERFAZ GRÁFICA NATIVA ---
 pestaña_buscar, pestaña_registrar, pestaña_robot = st.tabs([
     "🔎 BUSCAR", 
     "📝 ALERTA", 
@@ -125,9 +130,12 @@ with pestaña_registrar:
             contacto_limpio = "".join(filter(str.isdigit, contacto))
             file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
-            huella = extraer_huella(img_bgr)
+            
+            with st.spinner("La IA está analizando la foto..."):
+                huella = extraer_huella(img_bgr)
+            
             if huella is None:
-                st.error("❌ La IA no detectó ningún perro en la foto. Intentá con otra imagen más clara.")
+                st.error("❌ La IA no detectó ningún perro en la foto. Intentá con otra imagen donde el perrito se vea más de cerca y de frente.")
             else:
                 os.makedirs("fotos_registradas", exist_ok=True)
                 ruta_foto = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
@@ -151,9 +159,12 @@ with pestaña_buscar:
         if img_buscar_file:
             file_bytes = np.asarray(bytearray(img_buscar_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
-            huella_usuario = extraer_huella(img_bgr)
+            
+            with st.spinner("Buscando en la base de datos..."):
+                huella_usuario = extraer_huella(img_bgr)
+                
             if huella_usuario is None:
-                st.error("❌ La IA no pudo detectar un perro en esta foto.")
+                st.error("❌ La IA no pudo detectar un perro en esta foto. Asegurate de que el perrito esté bien visible.")
             else:
                 bd = cargar_base_datos()
                 if not bd:
@@ -170,26 +181,19 @@ with pestaña_buscar:
                             mayor_porcentaje = porcentaje
                             mejor_coincidencia = mascota
                     if mejor_coincidencia and mayor_porcentaje > 65:
-                        # Usamos componentes nativos de Streamlit para máxima estabilidad y compatibilidad de color
                         st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
-                        
                         st.info(f"""
                         👤 **Responsable:** {mejor_coincidencia['nombre_dueño']}
                         📍 **Ubicación:** {mejor_coincidencia['zona']}
                         🔗 **Link de origen:** {mejor_coincidencia['link_redes']}
                         """)
-                        
-                        # Mensaje automático para el botón de WhatsApp
                         mensaje_whatsapp = urllib.parse.quote(
                             f"¡Hola {mejor_coincidencia['nombre_dueño']}! Vi tu alerta en Misión Mascotas. "
                             f"La IA encontró una coincidencia muy alta con una foto. ¿Podemos hablar para verificar si es tu perrito?"
                         )
                         url_whatsapp = f"https://wa.me{mejor_coincidencia['contacto']}?text={mensaje_whatsapp}"
-                        
-                        # Botón de enlace nativo que abre WhatsApp en pestaña nueva
                         st.link_button("💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO", url_whatsapp)
                         st.write("") 
-                        
                         img_res = cv2.imread(mejor_coincidencia["ruta_imagen"])
                         st.image(cv2.cvtColor(img_res, cv2.COLOR_BGR2RGB), caption="Foto registrada en la base de datos")
                     else:
