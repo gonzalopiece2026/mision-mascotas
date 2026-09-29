@@ -81,8 +81,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    
-                    # CORRECCIÓN MAESTRA DEFINITIVA: Extraemos el valor escalar correcto de la matriz bidimensional [0][0]
                     porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
@@ -99,16 +97,15 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # SISTEMA DE COPIADO INTELIGENTE ANTI-BLOQUEOS
+                    # LINK DE COPIA TRADICIONAL COMPATIBLE CON TODOS LOS SERVIDORES
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     link_final_wa = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
                     st.subheader("📱 Datos de Contacto Directo")
                     st.code(f"Número del dueño: +{numero_match}", language="text")
                     
-                    # Guarda el enlace en memoria del dispositivo de forma transparente
-                    st.copy_to_clipboard(link_final_wa)
-                    st.success("📋 ¡Enlace de WhatsApp copiado al portapapeles! Abrí una pestaña nueva, pegalo con Ctrl+V (o mantener presionado en el celu) y listo para chatear.")
+                    # Cuadro de texto nativo infalible que permite copiar el link sin trabar la app
+                    st.text_input("🔗 Enlace directo de chat (Copialo y pegalo en tu navegador):", value=link_final_wa)
                     st.write("") 
                     
                     # DESPLIEGUE DIRECTO NATIVO DE LA IMAGEN DE CLOUDINARY
@@ -211,3 +208,5 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
+            num_destino = mascara.get('contacto', '')
+            msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
