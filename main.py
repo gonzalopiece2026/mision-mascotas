@@ -81,7 +81,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(similitud) * 100
+                    
+                    # CORRECCIÓN MAESTRA DEFINITIVA: Extraemos el valor escalar correcto de la matriz bidimensional [0][0]
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -104,7 +106,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.subheader("📱 Datos de Contacto Directo")
                     st.code(f"Número del dueño: +{numero_match}", language="text")
                     
-                    # Guarda el enlace en memoria de la PC o celu de forma transparente y nativa
+                    # Guarda el enlace en memoria del dispositivo de forma transparente
                     st.copy_to_clipboard(link_final_wa)
                     st.success("📋 ¡Enlace de WhatsApp copiado al portapapeles! Abrí una pestaña nueva, pegalo con Ctrl+V (o mantener presionado en el celu) y listo para chatear.")
                     st.write("") 
@@ -209,4 +211,3 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
-            num_destino = mascara.get('contacto', '')
