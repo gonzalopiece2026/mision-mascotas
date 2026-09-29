@@ -12,15 +12,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 # --- CONFIGURACIÓN DE LA PÁGINA WEB ---
 st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_icon="🐶", layout="centered")
 
-# --- DISEÑO VISUAL PINTORESCO PERSONALIZADO (CSS) ---
+# --- DISEÑO VISUAL PARA MODO OSCURO (CSS) ---
 st.markdown("""
     <style>
-    /* Fondo principal y textos */
-    .stApp {
-        background-color: #f4f6f9;
-    }
+    /* Forzamos tipografía y alineaciones globales */
     h1 {
-        color: #1e3a8a !important;
         font-family: 'Poppins', sans-serif;
         font-weight: 700;
         text-align: center;
@@ -28,39 +24,30 @@ st.markdown("""
     }
     .subtitulo {
         text-align: center;
-        color: #4b5563;
         font-size: 1.05rem;
         margin-bottom: 2rem;
+        opacity: 0.8;
     }
-    /* Estilo para ajustar las pestañas y que entren PERFECTAMENTE sin cortarse */
+    /* Estilo adaptativo para las pestañas */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 5px;
+        gap: 8px;
         justify-content: center;
         display: flex;
         width: 100% !important;
     }
     .stTabs [data-baseweb="tab"] {
-        background-color: #ffffff !important;
         border-radius: 15px;
-        padding: 6px 10px !important;
-        border: 1px solid #e5e7eb;
+        padding: 6px 12px !important;
         font-weight: bold !important;
-        color: #1e3a8a !important; /* CORRECCIÓN: Forzamos el color azul oscuro para que se lea perfecto */
-        font-size: 0.78rem !important;
+        font-size: 0.85rem !important;
         white-space: nowrap;
     }
-    .stTabs [aria-selected="true"] {
-        background-color: #2563eb !important;
-        color: white !important;
-        border: 1px solid #2563eb;
-        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
-    }
-    /* Tarjetas de perros encontrados */
+    /* Tarjetas de perros encontrados en modo oscuro */
     .tarjeta-perro {
-        background-color: #ffffff;
+        background-color: #1e293b;
         padding: 20px;
         border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         border-left: 5px solid #10b981;
         margin-top: 15px;
         margin-bottom: 15px;
@@ -87,8 +74,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA.</p>", unsafe_allow_html=True)
+st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allowed_html=True)
+st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA.</p>", unsafe_allowed_html=True)
 
 # Cargamos la IA y la base de datos
 @st.cache_resource
@@ -130,7 +117,7 @@ async def ejecutar_robot_global(palabra_clave):
     link_global = f"https://google.com{texto_seguro}&tbm=isch"
     contador = 0
     headers_simulados = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Introduction Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'es-ES,es;q=0.9',
         'Referer': 'https://google.com'
@@ -240,3 +227,11 @@ with pestaña_buscar:
                         huella_db = np.array(mascota["huella"]).reshape(1, -1)
                         vector_u = np.array(huella_usuario).reshape(1, -1)
                         similitud = cosine_similarity(vector_u, huella_db)
+                        porcentaje = float(similitud) * 100
+                        if porcentaje > mayor_porcentaje:
+                            mayor_porcentaje = porcentaje
+                            mejor_coincidencia = mascota
+                    if mejor_coincidencia and mayor_porcentaje > 65:
+                        st.markdown(f"""
+                            <div class="tarjeta-perro">
+                                <h3 style="color: #10b981; margin-top:0;">📊 ¡COINCIDENCIA ENCONTRADA! ({mayor_porcentaje:.2f}% de parecido)</h3>
