@@ -123,7 +123,8 @@ with pestaña_galeria:
         st.info("📭 No hay alertas registradas en este momento. ¡Las nuevas aparecerán acá!")
     else:
         for mascota in reversed(bd):
-            col_img, col_info = st.columns()
+            # CORRECCIÓN CLAVE: Agregamos el número 2 adentro para dividir correctamente en dos columnas
+            col_img, col_info = st.columns(2)
             with col_img:
                 if "http" in mascota["ruta_imagen"]:
                     st.image(mascota["ruta_imagen"], width=150)
@@ -135,11 +136,10 @@ with pestaña_galeria:
             with col_info:
                 st.markdown(f"**👤 Responsable:** {mascota['nombre_dueño']}")
                 st.markdown(f"**📍 Lugar del hecho:** {mascota['zona']}")
-                # Si el registro viejo no tiene fecha, le ponemos una por defecto para que no falle
                 fecha_hecho = mascota.get("fecha_hecho", "No especificada")
                 fecha_subida = mascota.get("fecha_subida", "No especificada")
                 st.markdown(f"**📅 Ocurrió el:** {fecha_hecho}")
-                st.markdown(f"**⏰ Subido a la app el:** {fecha_subida}")
+                st.markdown(f"**⏰ Subido el:** {fecha_subida}")
                 
                 msg_galeria = urllib.parse.quote(f"¡Hola {mascota['nombre_dueño']}! Vi la foto de la mascota que publicaste el {fecha_hecho} en la zona de {mascota['zona']} a través de Misión Mascotas. ¿Sigue activa la búsqueda?")
                 url_galeria = f"https://wa.me{mascota['contacto']}?text={msg_galeria}"
@@ -177,16 +177,10 @@ with pestaña_registrar:
     st.write("Subí la foto y detallá cuándo y dónde se vio al perrito por última vez.")
     img_file = st.file_uploader("Subí la foto del perro", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
     nombre = st.text_input("Nombre del Dueño / Rescatista")
-    
-    # Campo adaptado para registrar la ubicación exacta
     zona = st.text_input("¿Dónde se extravió / encontró? (Ej: Barrio Satélite, Moreno, Buenos Aires)")
-    
-    # Selector de calendario nativo para la fecha en que ocurrió el hecho
     fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
-    
     contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
     link = st.text_input("Link de la Publicación (Opcional)")
-    
     if st.button("Guardar en la Red Nacional"):
         if img_file and nombre and zona and contacto:
             contacto_limpio = "".join(filter(str.isdigit, contacto))
@@ -211,4 +205,9 @@ with pestaña_registrar:
                         ruta_foto_cloudinary = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
                         cv2.imwrite(ruta_foto_cloudinary, img_bgr)
                 
-                # Formateamos las fechas de manera prolija para que se lean lindo en Argentina
+                fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
+                fecha_subida_str = datetime.now().strftime("%d/%m/%Y a las %H:%M hs")
+                
+                bd = cargar_base_datos()
+                bd.append({
+                    "nombre_dueño": nombre,
