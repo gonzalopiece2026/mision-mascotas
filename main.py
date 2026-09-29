@@ -73,8 +73,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # EXTRACTOR MATHEMATICO BLINDADO: Extrae el valor escalar puro rompiendo los corchetes dobles de Scikit-Learn
-                    porcentaje = float(similitud[0][0]) * 100
+                    # EXTRACTOR MATHEMATICO FIJO: Extrae el valor escalar puro inmune a errores de array
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -101,7 +101,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     if foto_b64 and foto_b64 != "error":
                         try:
                             bytes_decor = base64.b64decode(foto_b64)
-                            st.image(bytes_decor, caption="Foto oficial del cruce inteligente", use_container_width=True)
+                            st.image(bytes_decor, caption="Foto oficial de la mascota encontrada", use_container_width=True)
                         except:
                             st.text("📷 Foto no compatible")
                 else:
@@ -134,7 +134,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), np.uint8)
+        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
@@ -182,17 +182,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL (FORMATO PLACA DE TELEVISIÓN COMPLETA FIJA) ---
-st.header("🖼️ Galería Nacional de Mascotas Alertas")
-bd = cargar_base_datos()
-if not bd:
-    st.info("📭 No hay alertas registradas en este momento en el archivo permanente. Las nuevas aparecerán acá de inmediato.")
-else:
-    for mascara in reversed(bd):
-        # Cada perrito se clava en un contenedor gris destacado tipo cartelera de noticiero
-        with st.container(border=True):
-            t_alerta = mascara.get('tipo_alerta', 'Perdido')
-            cartel_galeria = "🔴 MASCOTA PERDIDA" if t_alerta == "Perdido" else "🟢 MASCOTA ENCONTRADA"
-            st.markdown(f"## {cartel_galeria}")
-            
-            # Ficha técnica unificada fija arriba de la foto
+# --- 3️⃣ SECCIÓN DE DONACIONES ---
+st.header("💝 Apoyá a Misión Mascotas")
+st.write("Tu donación nos ayuda a mantener los servidores online las 24 horas.")
+st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
