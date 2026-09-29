@@ -86,8 +86,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allowed_html=True)
-st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA.</p>", unsafe_allowed_html=True)
+st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA.</p>", unsafe_allow_html=True)
 
 # Cargamos la IA y la base de datos
 @st.cache_resource
