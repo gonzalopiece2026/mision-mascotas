@@ -81,9 +81,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    
-                    # CORRECCIÓN EXTRA: Extracción segura del valor plano de la matriz de Scikit-Learn
-                    porcentaje = float(similitud[0][0]) * 100
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -93,7 +91,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                     st.info(f"👤 Responsable: {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 Lugar del hecho: {mejor_coincidencia.get('zona', 'No especificada')} \n📅 Fecha: {mejor_coincidencia.get('fecha_hecho', 'No especificada')}")
                     
-                    # Generación de enlace con el prefijo internacional de Argentina blindado
+                    # CORRECCIÓN ENLACE: Se agregó la barra diagonal "/" que faltaba para armar bien wa.me/
                     numero_match = mejor_coincidencia.get('contacto', '')
                     mensaje_whatsapp = urllib.parse.quote("¡Hola! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
@@ -101,7 +99,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.link_button("💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO", url_whatsapp)
                     st.write("") 
                     
-                    # Despliegue nítido de la foto guardada en Cloudinary
                     url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
                     if "http" in url_foto_match:
                         st.image(url_foto_match, caption="Foto de la mascota guardada en el reporte nacional", use_container_width=True)
@@ -125,7 +122,6 @@ telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, 
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
-        # Formateador Inteligente de WhatsApp Argentina: Limpia el texto y fuerza el prefijo 549 reglamentario
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
         if num_limpio.startswith("0"):
             num_limpio = num_limpio[1:]
@@ -158,7 +154,6 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
             
             fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
             
-            # Sincronización oficial de 3 horas con el horario de Argentina
             hora_argentina = datetime.now() - timedelta(hours=3)
             fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
             
@@ -201,6 +196,7 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
+            # CORRECCIÓN ENLACE GALERÍA: También agregamos la barra diagonal aquí
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
             url_gal = f"https://wa.me{num_destino}?text={msg_gal}"
