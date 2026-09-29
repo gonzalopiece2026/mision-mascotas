@@ -126,7 +126,7 @@ st.divider()
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
-# CASILLEROS NUEVOS CON RECOMENDACIONES DE LOS VECINOS
+# CASILLEROS COMUNITARIOS COMPLETOS
 tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
 img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
 nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
