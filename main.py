@@ -73,8 +73,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # CORRECCIÓN MAESTRA DEFINITIVA: Extraemos el flotante directo por posición indexada de Scikit-Learn
-                    porcentaje = float(similitud[0][0]) * 100
+                    # Extracción lineal aplanada de NumPy nativa
+                    valor_plano = float(np.ravel(similitud))
+                    porcentaje = valor_plano * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -160,7 +161,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 nueva_mascota = {
                     "tipo_alerta": tipo_alerta,
                     "nombre_perro": nombre_perro if nombre_perro else "No especificado",
-                    "raza": raza_perro if raza_perro else "No especificada",
+                    "raza": raza_perro if raza_perro else "No específica",
                     "color": color_perro if color_perro else "No especificado",
                     "detalles": detalles_perro if detalles_perro else "Sin detalles",
                     "nombre_dueño": nombre_rescatista,
@@ -201,5 +202,4 @@ else:
             else:
                 st.text("📷 Registro antiguo no disponible")
         with col_info:
-            t_alerta = mascara.get('tipo_alerta', 'Perdido')
-            cartel_galeria = "🔴 PERDIDO" if t_alerta == "Perdido" else "🟢 ENCONTRADO"
+            # CORRECCIÓN EN GALERÍA: Se cambiaron los nombres en inglés por las variables reales guardadas en español
