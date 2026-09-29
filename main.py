@@ -10,7 +10,7 @@ import requests
 import cloudinary
 import cloudinary.uploader
 
-# --- CONFIGURACIÓN DE CLOUDINARY REAL CORREGIDA CON TEXTO ESTRICTO ---
+# --- CONFIGURACIÓN DE CLOUDINARY REAL ---
 cloudinary.config(
     cloud_name="rur0qbqsy",
     api_key="241877892786994",
@@ -154,7 +154,7 @@ with pestaña_robot:
         elif fotos_bajadas == 0:
             st.warning("⚠️ No se pudieron extraer imágenes en este intento.")
         else:
-            st.success(f"🤖 ¡Robot finalizado con éxito! Se descargaron {fotos_bajadas} fotos nuevas.")
+            st.success(f"🤖 ¡Robot finalizado con éxito! Se completó el rastreo y se descargaron {fotos_bajadas} fotos nuevas.")
 
 with pestaña_registrar:
     st.subheader("Registrar Alerta de Mascota")
@@ -171,8 +171,7 @@ with pestaña_registrar:
             file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
             
-            with st.spinner("Procesando matriz visual de forma segura..."):
-                huella = extraer_huella_segura(img_bgr)
+            huella = extraer_huella_segura(img_bgr)
             
             if huella is None:
                 st.error("❌ Ocurrió un problema al procesar la imagen.")
@@ -211,7 +210,9 @@ with pestaña_buscar:
     st.subheader("Buscar Coincidencias Visuales")
     st.write("Subí la foto de un perro para contrastarlo con la base de datos.")
     img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
-    if st.button("Buscar Coincidencias con IA"):
-        if img_buscar_file:
-            file_bytes = np.asarray(bytearray(img_buscar_file.read()), dtype=np.uint8)
-            img_bgr = cv2.imdecode(file_bytes, 1)
+    
+    # CORRECCIÓN MAESTRA: Si hay un archivo cargado, ejecuta la búsqueda AUTOMÁTICAMENTE sin depender de botones
+    if img_buscar_file:
+        file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
+        img_bgr = cv2.imdecode(file_bytes, 1)
+        
