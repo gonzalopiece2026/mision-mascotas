@@ -10,10 +10,79 @@ from ultralytics import YOLO
 from sklearn.metrics.pairwise import cosine_similarity
 
 # --- CONFIGURACIÓN DE LA PÁGINA WEB ---
-st.set_page_config(page_title="Misión Mascotas Global", page_icon="🐶", layout="centered")
+st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_icon="🐶", layout="centered")
 
-st.markdown("# 🐶 Misión Mascotas - Plataforma Autónoma con IA")
-st.markdown("Rastreo automático de redes sociales y buscador de coincidencias por reconocimiento visual.")
+# --- DISEÑO VISUAL PINTORESCO PERSONALIZADO (CSS) ---
+st.markdown("""
+    <style>
+    /* Fondo principal y textos */
+    .stApp {
+        background-color: #f7f9fc;
+    }
+    h1 {
+        color: #1e3a8a !important;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        text-align: center;
+    }
+    .subtitulo {
+        text-align: center;
+        color: #4b5563;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    /* Estilo para las pestañas */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        justify-content: center;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 10px 20px;
+        border: 1px solid #e5e7eb;
+        font-weight: 600;
+        color: #4b5563;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        border: 1px solid #3b82f6;
+    }
+    /* Tarjetas de perros encontrados */
+    .tarjeta-perro {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border-left: 5px solid #10b981;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+    /* Botón de WhatsApp */
+    .btn-whatsapp {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #25d366;
+        color: white !important;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1rem;
+        box-shadow: 0 4px 6px rgba(37, 211, 102, 0.3);
+        transition: background-color 0.3s;
+        margin-top: 10px;
+    }
+    .btn-whatsapp:hover {
+        background-color: #128c7e;
+    }
+    </style>
+""", unsafe_allowed_html=True)
+
+st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allowed_html=True)
+st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con Inteligencia Artificial.</p>", unsafe_allowed_html=True)
 
 # Cargamos la IA y la base de datos
 @st.cache_resource
@@ -47,17 +116,15 @@ def extraer_huella(img_bgr):
                 return (gris.flatten() / 255.0).tolist()
     return None
 
-# --- ROBOT EVOLUCIONADO ANTIBLOQUEO CORREGIDO ---
+# --- ROBOT EVOLUCIONADO ANTIBLOQUEO ---
 async def ejecutar_robot_global(palabra_clave):
     os.makedirs(CARPETA_IMAGENES, exist_ok=True)
     
     query_busqueda = f"{palabra_clave} site:facebook.com"
     texto_seguro = urllib.parse.quote(query_busqueda)
-    # URL CORREGIDA: Se agregó el "/search?q=" correspondiente para evitar que se peguen las palabras
     link_global = f"https://google.com{texto_seguro}&tbm=isch"
     
     contador = 0
-    
     headers_simulados = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -68,10 +135,8 @@ async def ejecutar_robot_global(palabra_clave):
     try:
         session = requests.Session()
         response = session.get(link_global, headers=headers_simulados, timeout=10)
-        
         if response.status_code != 200:
             return -1
-            
         html = response.text
         
         pos = 0
@@ -97,23 +162,20 @@ async def ejecutar_robot_global(palabra_clave):
                     contador -= 1
                     
             pos = end
-            
         return contador
-            
-    except Exception as e:
-        print(f"Error en robot evolucionado: {e}")
+    except:
         return -1
 
 # --- INTERFAZ GRÁFICA (PESTAÑAS) ---
 pestaña_buscar, pestaña_registrar, pestaña_robot = st.tabs([
     "🔎 BUSCADOR INTELIGENTE", 
     "📝 REGISTRAR NUEVA ALERTA", 
-    "🤖 ROBOT RASTREADOR GLOBAL"
+    "🤖 ROBOT RASTREADOR DE REDES"
 ])
 
 with pestaña_robot:
-    st.subheader("Configuración del Robot Buscador")
-    st.write("Escribí qué querés que el robot busque en las redes (ej: perro perdido Moreno).")
+    st.subheader("Configuración del Robot Rastreador")
+    st.write("Escribí qué querés que el robot busque en internet (ej: perro perdido Moreno, perrito extraviado Avellaneda).")
     
     termino_busqueda = st.text_input("Palabras clave de búsqueda:", value="perro perdido Moreno")
     
@@ -128,45 +190,50 @@ with pestaña_robot:
         elif fotos_bajadas == 0:
             st.warning("⚠️ No se pudieron extraer imágenes en este intento. Probá afinando o cambiando las palabras clave.")
         else:
-            st.success(f"🤖 ¡Robot finalizado con éxito! Se completó el rastreo y se descargaron {fotos_bajadas} fotos nuevas en la carpeta '{CARPETA_IMAGENES}'.")
+            st.success(f"🤖 ¡Robot finalizado con éxito! Se completó el rastreo y se descargaron {fotos_bajadas} fotos nuevas en la base de datos temporal.")
 
 with pestaña_registrar:
-    st.subheader("Registrar Perro Manualmente")
+    st.subheader("Registrar Alerta de Mascota")
+    st.write("Subí la foto y los datos del perrito para que el buscador federal lo indexe.")
     img_file = st.file_uploader("Subí la foto del perro", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
-    nombre = st.text_input("Nombre del Dueño")
-    zona = st.text_input("Zona / Localidad")
-    contacto = st.text_input("Teléfono de Contacto")
-    link = st.text_input("Link de la Publicación")
+    nombre = st.text_input("Nombre del Dueño / Rescatista")
+    zona = st.text_input("Provincia / Localidad / Barrio (Ej: Moreno, Buenos Aires)")
+    contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
+    link = st.text_input("Link de la Publicación (Opcional)")
     
-    if st.button("Guardar en Base de Datos"):
+    if st.button("Guardar en la Red Nacional"):
         if img_file and nombre and zona and contacto:
+            # Limpiamos el número de teléfono eliminando espacios o guiones
+            contacto_limpio = "".join(filter(str.isdigit, contacto))
+            
             file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
             huella = extraer_huella(img_bgr)
             
             if huella is None:
-                st.error("❌ La IA no detectó ningún perro en la foto.")
+                st.error("❌ La IA no detectó ningún perro en la foto. Intentá con otra imagen más clara.")
             else:
                 os.makedirs("fotos_registradas", exist_ok=True)
-                ruta_foto = f"fotos_registradas/perro_{nombre}_{contacto}.jpg"
+                ruta_foto = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
                 cv2.imwrite(ruta_foto, img_bgr)
                 
                 bd = cargar_base_datos()
                 bd.append({
-                    "nombre_dueño": nombre, "zona": zona, "contacto": contacto,
+                    "nombre_dueño": nombre, "zona": zona, "contacto": contacto_limpio,
                     "link_redes": link if link else "No especificado",
                     "ruta_imagen": ruta_foto, "huella": huella
                 })
                 guardar_base_datos(bd)
-                st.success(f"✅ ¡Éxito! Mascota de '{nombre}' registrada.")
+                st.success(f"✅ ¡Éxito! Mascota de '{nombre}' registrada en la base de datos nacional.")
         else:
-            st.warning("⚠️ Todos los campos son obligatorios.")
+            st.warning("⚠️ Todos los campos principales son obligatorios.")
 
 with pestaña_buscar:
-    st.subheader("Buscar Coincidencias con IA")
+    st.subheader("Buscar Coincidencias Visuales")
+    st.write("Subí la foto de un perro que hayas encontrado en la calle o que estés buscando para contrastarlo con la base de datos.")
     img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
     
-    if st.button("Buscar Coincidencias"):
+    if st.button("Buscar Coincidencias con IA"):
         if img_buscar_file:
             file_bytes = np.asarray(bytearray(img_buscar_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
@@ -177,7 +244,7 @@ with pestaña_buscar:
             else:
                 bd = cargar_base_datos()
                 if not bd:
-                    st.warning("📭 La base de datos está vacía. Registrá un perro primero.")
+                    st.warning("📭 La base de datos nacional está vacía. Registrá un perro primero.")
                 else:
                     mejor_coincidencia = None
                     mayor_porcentaje = 0.0
@@ -185,21 +252,3 @@ with pestaña_buscar:
                     for mascota in bd:
                         huella_db = np.array(mascota["huella"]).reshape(1, -1)
                         vector_u = np.array(huella_usuario).reshape(1, -1)
-                        similitud = cosine_similarity(vector_u, huella_db)
-                        porcentaje = float(similitud) * 100
-                        
-                        if porcentaje > mayor_porcentaje:
-                            mayor_porcentaje = porcentaje
-                            mejor_coincidencia = mascota
-                            
-                    if mejor_coincidencia and mayor_porcentaje > 65:
-                        st.info(f"📊 ¡COINCIDENCIA ENCONTRADA! ({mayor_porcentaje:.2f}% de parecido)")
-                        st.write(f"👤 **Dueño:** {mejor_coincidencia['nombre_dueño']}")
-                        st.write(f"📍 **Zona:** {mejor_coincidencia['zona']}")
-                        st.write(f"📞 **Contacto:** {mejor_coincidencia['contacto']}")
-                        st.write(f"🔗 **Link:** {mejor_coincidencia['link_redes']}")
-                        
-                        img_res = cv2.imread(mejor_coincidencia["ruta_imagen"])
-                        st.image(cv2.cvtColor(img_res, cv2.COLOR_BGR2RGB))
-                    else:
-                        st.error("❌ No se encontraron perros similares.")
