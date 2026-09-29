@@ -15,7 +15,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 cloudinary.config(
     cloud_name="rur0qbqsy",
     api_key="241877892786994",
-    api_secret="7lE9S4b4N4q-7iA_VfOOfDk4m0g" # Secreto extraído de la URL de tu variable de entorno
+    api_secret="7lE9S4b4N4q-7iA_VfOOfDk4m0g"
 )
 
 # --- CONFIGURACIÓN DE LA PÁGINA WEB ---
@@ -121,11 +121,9 @@ with pestaña_galeria:
     if not bd:
         st.info("📭 No hay alertas registradas en este momento. ¡Las nuevas aparecerán acá!")
     else:
-        # Mostramos las alertas en un formato de cuadrícula limpia
-        for mascota in reversed(bd): # Al usar reversed mostramos siempre el último cargado arriba
+        for mascota in reversed(bd):
             col_img, col_info = st.columns([1, 2])
             with col_img:
-                # Si la imagen viene de Cloudinary cargará por link, sino de forma local
                 if "http" in mascota["ruta_imagen"]:
                     st.image(mascota["ruta_imagen"], width=150)
                 else:
@@ -137,7 +135,6 @@ with pestaña_galeria:
                 st.markdown(f"**👤 Responsable:** {mascota['nombre_dueño']}")
                 st.markdown(f"**📍 Ubicación:** {mascota['zona']}")
                 
-                # Botón de WhatsApp rápido para cada perro de la galería
                 msg_galeria = urllib.parse.quote(f"¡Hola {mascota['nombre_dueño']}! Vi la foto de la mascota que publicaste en la sección de alertas de Misión Mascotas. ¿Sigue estando activa la búsqueda?")
                 url_galeria = f"https://wa.me{mascota['contacto']}?text={msg_galeria}"
                 st.link_button(f"💬 Hablar con {mascota['nombre_dueño']}", url_galeria)
@@ -191,12 +188,9 @@ with pestaña_registrar:
             else:
                 with st.spinner("Subiendo imagen de forma segura a la nube de Cloudinary..."):
                     try:
-                        # Guardamos una copia temporal para subirla
                         cv2.imwrite("temp_upload.jpg", img_bgr)
-                        # Mandamos la foto a internet y obtenemos la URL eterna
                         resultado_upload = cloudinary.uploader.upload("temp_upload.jpg")
                         ruta_foto_cloudinary = resultado_upload["secure_url"]
-                        # Borramos el temporal
                         if os.path.exists("temp_upload.jpg"):
                             os.remove("temp_upload.jpg")
                     except Exception as upload_err:
@@ -206,5 +200,18 @@ with pestaña_registrar:
                 
                 bd = cargar_base_datos()
                 bd.append({
-                    "nombre_dueño": nombre, "zona": zona, "contacto": contacto_limpio,
+                    "nombre_dueño": nombre,
+                    "zona": zona,
+                    "contacto": contacto_limpio,
                     "link_redes": link if link else "No especificado",
+                    "ruta_imagen": ruta_foto_cloudinary,
+                    "huella": huella
+                })
+                guardar_base_datos(bd)
+                st.success(f"✅ ¡Éxito! Mascota registrada de forma permanente en la nube nacional.")
+        else:
+            st.warning("⚠️ Todos los campos principales son obligatorios.")
+
+with pestaña_buscar:
+    st.subheader("Buscar Coincidencias Visuales")
+    st.write("Subí la foto de un perro para contrastarlo con la base de datos.")
