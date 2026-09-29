@@ -77,7 +77,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(similitud) * 100
+                    
+                    # CORRECCIÓN MAESTRA MATEMÁTICA: Extraemos el valor flotante real de la matriz para evitar el TypeError
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -94,7 +96,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.link_button("💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO", url_whatsapp)
                     st.write("") 
                     
-                    # CORRECCIÓN MAESTRA: Forzamos el despliegue nítido de la foto guardada en Cloudinary bajo el match
+                    # Despliegue nítido de la foto guardada en Cloudinary bajo el match
                     url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
                     if "http" in url_foto_match:
                         st.image(url_foto_match, caption="Foto de la mascota guardada en el reporte nacional", use_container_width=True)
@@ -176,7 +178,7 @@ else:
                 st.text("📷 Foto no disponible")
         with col_info:
             st.markdown(f"**👤 Responsable:** {mascara.get('nombre_dueño', 'Anónimo')}")
-            st.markdown(f"**📍 Lugar del hecho:** {mascara.get('zona', 'No Playwright')}")
+            st.markdown(f"**📍 Lugar del hecho:** {mascara.get('zona', 'No especificado')}")
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
