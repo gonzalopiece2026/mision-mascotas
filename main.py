@@ -91,12 +91,20 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                     st.info(f"👤 Responsable: {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 Lugar del hecho: {mejor_coincidencia.get('zona', 'No especificada')} \n📅 Fecha: {mejor_coincidencia.get('fecha_hecho', 'No especificada')}")
                     
-                    # LINK MEJORADO: Usamos el sistema oficial ://whatsapp.com para saltar el bloqueo de historial de Chrome
+                    # LINK HTML BLINDADO: Abre en la misma pestaña de forma nativa para que ningún navegador active bloqueadores
                     numero_match = mejor_coincidencia.get('contacto', '')
                     mensaje_whatsapp = urllib.parse.quote("¡Hola! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
-                    url_whatsapp = f"https://://whatsapp.com/send?phone={numero_match}&text={mensaje_whatsapp}"
+                    url_whatsapp = f"https://whatsapp.com{numero_match}&text={mensaje_whatsapp}"
                     
-                    st.link_button("💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO", url_whatsapp)
+                    # Creamos el botón en HTML nativo súper vistoso y seguro
+                    boton_html = f"""
+                    <a href="{url_whatsapp}" style="text-decoration:none;">
+                        <div style="background-color:#25d366; color:white; padding:12px 20px; text-align:center; border-radius:8px; font-weight:bold; font-family:sans-serif; margin-bottom:15px; font-size:16px;">
+                            💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO
+                        </div>
+                    </a>
+                    """
+                    st.markdown(boton_html, unsafe_allow_html=True)
                     st.write("") 
                     
                     url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
@@ -139,7 +147,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         huella = extraer_huella_segura(img_bgr)
         
         if huella is None:
-            st.error("❌ Ocurrió un problem al procesar la imagen.")
+            st.error("❌ Ocurrió un problema al procesar la imagen.")
         else:
             with st.spinner("Subiendo imagen de forma segura a la nube de Cloudinary..."):
                 try:
@@ -191,21 +199,15 @@ else:
             else:
                 st.text("📷 Foto no disponible")
         with col_info:
-            st.markdown(f"**👤 Responsable:** {mascara.get('nombre_dueño', 'Anónimo')}")
+            nombre_galeria = mascara.get('nombre_dueño', 'Anónimo')
+            st.markdown(f"**👤 Responsable:** {nombre_galeria}")
             st.markdown(f"**📍 Lugar del hecho:** {mascara.get('zona', 'No especificado')}")
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
-            # LINK MEJORADO GALERÍA: También aplicamos ://whatsapp.com aquí
+            # LINK HTML EN GALERÍA TAMBIÉN
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
-            url_gal = f"https://://whatsapp.com/send?phone={num_destino}&text={msg_gal}"
-            st.link_button("💬 Hablar por WhatsApp", url_gal)
-        st.divider()
-
-st.divider()
-
-# --- 4️⃣ SECCIÓN DE DONACIONES ---
-st.header("💝 Apoyá a Misión Mascotas")
-st.write("Tu donación nos ayuda a mantener los servidores online las 24 horas.")
-st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
+            url_gal = f"https://whatsapp.com{num_destino}&text={msg_gal}"
+            
+            boton_galeria_html = f"""
