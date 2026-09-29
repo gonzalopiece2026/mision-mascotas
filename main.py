@@ -73,8 +73,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción lineal nativa de la matriz de Scikit-Learn
-                    porcentaje = float(similitud) * 100
+                    # CORRECCIÓN DEFINITIVA: Rompemos las cajas de corchetes con la posición [0][0] para evitar el TypeError
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -195,5 +195,5 @@ else:
             cartel_galeria = "🔴 MASCOTA PERDIDA" if t_alerta == "Perdido" else "🟢 MASCOTA ENCONTRADA"
             st.markdown(f"## {cartel_galeria}")
             
-            # Imprimimos toda la ficha técnica fija arriba de forma obligatoria
+            # Imprimimos toda la ficha técnica fija de forma obligatoria
             st.markdown(f"**🐾 Nombre de la mascota:** {mascara.get('nombre_perro', 'No especificado')}")
