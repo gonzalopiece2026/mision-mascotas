@@ -94,12 +94,42 @@ async def ejecutar_robot_global(palabra_clave):
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA NATIVA ULTRA COMPACTA ---
-pestaña_buscar, pestaña_registrar, pestaña_robot = st.tabs([
+# --- INTERFAZ GRÁFICA CON NUEVO APARTADO DE DONACIONES ---
+pestaña_buscar, pestaña_registrar, pestaña_robot, pestaña_donar = st.tabs([
     "🔎 BUSCAR", 
     "📝 ALERTA", 
-    "🤖 ROBOT"
+    "🤖 ROBOT",
+    "💝 DONAR"
 ])
+
+with pestaña_donar:
+    st.subheader("💝 Apoyá a Misión Mascotas")
+    st.write("""
+    Esta plataforma es **100% gratuita y libre de publicidad** para ayudar a que más familias vuelvan a encontrarse. 
+    Tu donación nos ayuda directamente a mantener los servidores online las 24 horas y seguir mejorando la Inteligencia Artificial.
+    """)
+    
+    st.divider()
+    
+    st.markdown("### 💳 Transferencia Directa (Cualquier Banco o Billetera)")
+    st.info("""
+    * **Alias:** `TU.ALIAS.AQUÍ` *(Cambiá esto por el alias de tu cuenta)*
+    * **CBU:** `0000000000000000000000` *(Cambiá esto por tu CBU real)*
+    * **Titular:** Gonzalo
+    """)
+    
+    st.divider()
+    
+    st.markdown("### 🚀 Links de Mercado Pago rápidos")
+    st.write("Elegí el monto con el que quieras colaborar hoy:")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.link_button("☕ Invitar un Cafecito ($1.000)", "https://link-de-mercado-pago-de-1000")
+    with col2:
+        st.link_button("🍔 Colaboración Media ($3.000)", "https://link-de-mercado-pago-de-3000")
+    with col3:
+        st.link_button("💎 Súper Colaboración ($5.000)", "https://link-de-mercado-pago-de-5000")
 
 with pestaña_robot:
     st.subheader("Configuración del Robot Rastreador")
@@ -177,7 +207,7 @@ with pestaña_buscar:
                         vector_u = np.array(huella_usuario).reshape(1, -1)
                         similitud = cosine_similarity(vector_u, huella_db)
                         
-                        porcentaje = float(similitud[0][0]) * 100
+                        porcentaje = float(similitud) * 100
                         if porcentaje > mayor_porcentaje:
                             mayor_porcentaje = porcentaje
                             mejor_coincidencia = mascota
@@ -187,20 +217,3 @@ with pestaña_buscar:
                         
                         st.info(f"""
                         👤 **Responsable:** {mejor_coincidencia['nombre_dueño']}
-                        📍 **Ubicación:** {mejor_coincidencia['zona']}
-                        🔗 **Link de origen:** {mejor_coincidencia['link_redes']}
-                        """)
-                        
-                        mensaje_whatsapp = urllib.parse.quote(
-                            f"¡Hola {mejor_coincidencia['nombre_dueño']}! Vi tu alerta en Misión Mascotas. "
-                            f"La IA encontró una coincidencia muy alta con una foto. ¿Podemos hablar para verificar si es tu perrito?"
-                        )
-                        url_whatsapp = f"https://wa.me{mejor_coincidencia['contacto']}?text={mensaje_whatsapp}"
-                        
-                        st.link_button("💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO", url_whatsapp)
-                        st.write("") 
-                        
-                        img_res = cv2.imread(mejor_coincidencia["ruta_imagen"])
-                        st.image(cv2.cvtColor(img_res, cv2.COLOR_BGR2RGB), caption="Foto registrada en la base de datos")
-                    else:
-                        st.error("❌ No se encontraron perros con características similares en la base de datos.")
