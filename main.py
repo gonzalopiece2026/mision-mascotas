@@ -110,7 +110,6 @@ with pestaña_donar:
     st.divider()
     
     st.markdown("### 💳 Transferencia Directa (Monto Libre)")
-    # RELLENÁ ACÁ ABAJO CON TUS DATOS VERDADEROS:
     st.text("Alias: PONÉ_ACÁ_TU_ALIAS_REAL")
     st.text("CBU / CVU: PONÉ_ACÁ_TU_CBU_O_CVU_REAL")
     st.text("Titular: Gonzalo")
@@ -120,7 +119,6 @@ with pestaña_donar:
     st.markdown("### 🚀 Links de Mercado Pago rápidos")
     st.write("Elegí una opción o usá el botón de colaboración libre:")
     
-    # RELLENÁ LOS LINKS DE ADENTRO DE LAS COMILLAS CON TUS LINKS REALES DE MERCADO PAGO:
     col1, col2, col3 = st.columns(3)
     with col1:
         st.link_button("☕ Cafecito ($1.000)", "https://mpago.la")
@@ -129,8 +127,7 @@ with pestaña_donar:
     with col3:
         st.link_button("💎 Súper ($5.000)", "https://mpago.la")
         
-    st.write("") # Espacio visual
-    # BOTÓN DE MONTO LIBRE (Podés crear un link de pago con monto abierto en Mercado Pago o poner un link a tu alias):
+    st.write("") 
     st.link_button("✨ COLABORACIÓN CON MONTO LIBRE", "https://link-de-mercado-pago-monto-libre-o-alias")
 
 with pestaña_robot:
@@ -209,9 +206,11 @@ with pestaña_buscar:
                         vector_u = np.array(huella_usuario).reshape(1, -1)
                         similitud = cosine_similarity(vector_u, huella_db)
                         
-                        porcentaje = float(similitud) * 100
+                        porcentaje = float(similitud[0][0]) * 100
                         if porcentaje > mayor_porcentaje:
                             mayor_porcentaje = porcentaje
                             mejor_coincidencia = mascota
                             
                     if mejor_coincidencia and mayor_porcentaje > 65:
+                        st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
+                        
