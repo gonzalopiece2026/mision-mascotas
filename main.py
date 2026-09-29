@@ -12,70 +12,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 # --- CONFIGURACIÓN DE LA PÁGINA WEB ---
 st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_icon="🐶", layout="centered")
 
-# --- DISEÑO VISUAL PARA MODO OSCURO (CSS) ---
-st.markdown("""
-    <style>
-    /* Forzamos tipografía y alineaciones globales */
-    h1 {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        text-align: center;
-        margin-bottom: 5px !important;
-    }
-    .subtitulo {
-        text-align: center;
-        font-size: 1.05rem;
-        margin-bottom: 2rem;
-        opacity: 0.8;
-    }
-    /* Estilo adaptativo para las pestañas */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        justify-content: center;
-        display: flex;
-        width: 100% !important;
-    }
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 15px;
-        padding: 6px 12px !important;
-        font-weight: bold !important;
-        font-size: 0.85rem !important;
-        white-space: nowrap;
-    }
-    /* Tarjetas de perros encontrados en modo oscuro */
-    .tarjeta-perro {
-        background-color: #1e293b;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        border-left: 5px solid #10b981;
-        margin-top: 15px;
-        margin-bottom: 15px;
-    }
-    /* Botón de WhatsApp */
-    .btn-whatsapp {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #25d366;
-        color: white !important;
-        padding: 12px 24px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 1rem;
-        box-shadow: 0 4px 6px rgba(37, 211, 102, 0.3);
-        transition: background-color 0.3s;
-        margin-top: 10px;
-    }
-    .btn-whatsapp:hover {
-        background-color: #128c7e;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allowed_html=True)
-st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA.</p>", unsafe_allowed_html=True)
+st.title("🐶 Misión Mascotas")
+st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
 # Cargamos la IA y la base de datos
 @st.cache_resource
@@ -156,7 +94,7 @@ async def ejecutar_robot_global(palabra_clave):
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA ULTRA COMPACTA ---
+# --- INTERFAZ GRÁFICA NATIVA ULTRA COMPACTA ---
 pestaña_buscar, pestaña_registrar, pestaña_robot = st.tabs([
     "🔎 BUSCAR", 
     "📝 ALERTA", 
@@ -238,3 +176,31 @@ with pestaña_buscar:
                         huella_db = np.array(mascota["huella"]).reshape(1, -1)
                         vector_u = np.array(huella_usuario).reshape(1, -1)
                         similitud = cosine_similarity(vector_u, huella_db)
+                        
+                        # CORRECCIÓN DEFINITIVA: Extraemos el valor escalar correcto de la matriz
+                        porcentaje = float(similitud[0][0]) * 100
+                        if porcentaje > mayor_porcentaje:
+                            mayor_porcentaje = porcentaje
+                            mejor_coincidencia = mascota
+                            
+                    if mejor_coincidencia and mayor_porcentaje > 65:
+                        st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
+                        
+                        st.info(f"""
+                        👤 **Responsable:** {mejor_coincidencia['nombre_dueño']}
+                        📍 **Ubicación:** {mejor_coincidencia['zona']}
+                        🔗 **Link de origen:** {mejor_coincidencia['link_redes']}
+                        """)
+                        
+                        mensaje_whatsapp = urllib.parse.quote(
+                            f"¡Hola {mejor_coincidencia['nombre_dueño']}! Vi tu alerta en Misión Mascotas. "
+                            f"La IA encontró una coincidencia muy alta con una foto. ¿Podemos hablar para verificar si es tu perrito?"
+                        )
+                        url_whatsapp = f"https://wa.me{mejor_coincidencia['contacto']}?text={mensaje_whatsapp}"
+                        
+                        st.link_button("💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO", url_whatsapp)
+                        st.write("") 
+                        
+                        img_res = cv2.imread(mejor_coincidencia["ruta_imagen"])
+                        st.image(cv2.cvtColor(img_res, cv2.COLOR_BGR2RGB), caption="Foto registrada en la base de datos")
+                    else:
