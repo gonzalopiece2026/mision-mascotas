@@ -110,27 +110,19 @@ with pestaña_donar:
     st.divider()
     
     st.markdown("### 💳 Transferencia Directa (Monto Libre)")
-    # Cuando quieras podés cambiar estos dos renglones por tu Alias y CBU reales del banco
+    # Cuando quieras podés cambiar estos dos renglones por tu Alias y CBU reales de tu banco
     st.text("Alias: TU.ALIAS.REAL.AQUÍ")
     st.text("CBU / CVU: 0000000000000000000000")
     st.text("Titular: Gonzalo")
     
     st.divider()
     
-    st.markdown("### 🚀 Links de Mercado Pago rápidos")
-    st.write("Elegí una opción rápida o usá el botón de colaboración libre:");
-    
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.link_button("☕ Cafecito ($1.000)", "https://link-de-mercado-pago-de-1000")
-    with col2:
-        st.link_button("🍔 Combo ($3.000)", "https://link-de-mercado-pago-de-3000")
-    with col3:
-        st.link_button("💎 Súper ($5.000)", "https://link-de-mercado-pago-de-5000")
-        
+    st.markdown("### 🚀 Mercado Pago (Monto Libre)")
+    st.write("Hacé clic en el botón de abajo para colaborar con el monto que vos elijas de forma segura:")
     st.write("") 
-    # ¡BOTÓN INTEGRADO CON TU LINK OFICIAL DE MONTO LIBRE!
-    st.link_button("✨ COLABORACIÓN CON MONTO LIBRE", "https://link.mercadopago.com.ar/misionmascotas")
+    
+    # ¡BOTÓN EXCLUSIVO DE MONTO LIBRE CON TU LINK REAL!
+    st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
 
 with pestaña_robot:
     st.subheader("Configuración del Robot Rastreador")
@@ -216,3 +208,6 @@ with pestaña_buscar:
                     if mejor_coincidencia and mayor_porcentaje > 65:
                         st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                         
+                        st.info(f"👤 Responsable: {mejor_coincidencia['nombre_dueño']} \n📍 Ubicación: {mejor_coincidencia['zona']} \n🔗 Link de origen: {mejor_coincidencia['link_redes']}")
+                        
+                        mensaje_whatsapp = urllib.parse.quote(
