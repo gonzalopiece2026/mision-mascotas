@@ -3,7 +3,7 @@ import cv2
 import json
 import asyncio
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import streamlit as st
 import requests
@@ -30,6 +30,10 @@ def cargar_base_datos():
     if os.path.exists(ARCHIVO_BD):
         with open(ARCHIVO_BD, "r", encoding="utf-8") as f:
             try:
+                contenido = f.read().strip()
+                if not contenido or contenido == "[]":
+                    return []
+                f.seek(0)
                 return json.load(f)
             except:
                 return []
@@ -77,9 +81,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    
-                    # CORRECCIÓN MAESTRA MATEMÁTICA: Extraemos el valor flotante real de la matriz para evitar el TypeError
-                    porcentaje = float(similitud[0][0]) * 100
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -141,7 +143,10 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     ruta_foto_cloudinary = "error"
             
             fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
-            fecha_subida_str = datetime.now().strftime("%d/%m/%Y a las %H:%M hs")
+            
+            # CORRECCIÓN DE HORA: Restamos 3 horas al reloj del servidor para fijar el horario oficial de Argentina
+            hora_argentina = datetime.now() - timedelta(hours=3)
+            fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
             
             nueva_mascota = {
                 "nombre_dueño": nombre_rescatista,
