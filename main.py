@@ -73,8 +73,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción matemática nativa de la matriz de scikit-learn
-                    porcentaje = float(similitud[0][0]) * 100
+                    # Extracción lineal aplanada de NumPy nativa
+                    valor_plano = float(np.ravel(similitud))
+                    porcentaje = valor_plano * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -83,14 +84,22 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 if mejor_coincidencia and mayor_porcentaje > 65:
                     st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                     
-                    fecha_hecho_match = mejor_coincidencia.get('fecha_hecho', 'No especificada')
-                    zona_match = mejor_coincidencia.get('zona', 'No especificada')
-                    responsable_match = mejor_coincidencia.get('nombre_dueño', 'Anónimo')
+                    tipo_match = mejor_coincidencia.get('tipo_alerta', 'Perdido')
+                    cartel_tipo = "🔴 ALERTA: PERDIDO" if tipo_match == "Perdido" else "🟢 ALERTA: ENCONTRADO"
+                    
+                    st.markdown(f"### {cartel_tipo}")
+                    st.info(f"""
+                    👤 **Responsable:** {mejor_coincidencia.get('nombre_dueño', 'Anónimo')}
+                    📍 **Lugar del hecho:** {mejor_coincidencia.get('zona', 'No especificado')}
+                    📅 **Fecha del suceso:** {mejor_coincidencia.get('fecha_hecho', 'No especificada')}
+                    
+                    🐾 **Nombre de la mascota:** {mejor_coincidencia.get('nombre_perro', 'No especificado')}
+                    🐕 **Raza / Color:** {mejor_coincidencia.get('raza', 'No especificada')} | {mejor_coincidencia.get('color', 'No especificado')}
+                    📝 **Detalles particulares:** {mejor_coincidencia.get('detalles', 'Sin detalles adicionales')}
+                    """)
+                    
+                    # CONTACTO MANUAL INDESTRUCTIBLE
                     numero_match = mejor_coincidencia.get('contacto', '')
-                    
-                    st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
-                    
-                    # SECCIÓN DE CONTACTO EXCLUSIVAMENTE CON COPIA MANUAL REPARADA
                     st.markdown("### 📱 Teléfono de Contacto:")
                     st.write("Copiá el número de abajo para comunicarte con el responsable:")
                     st.code(f"{numero_match}", language="text")
@@ -101,7 +110,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     if foto_b64 and foto_b64 != "error" and "http" not in str(foto_b64):
                         try:
                             bytes_decor = base64.b64decode(foto_b64)
-                            st.image(bytes_decor, caption="Foto oficial de la mascota en el reporte nacional", use_container_width=True)
+                            st.image(bytes_decor, caption="Foto oficial del cruce inteligente", use_container_width=True)
                         except:
                             st.warning("📷 Formato de imagen no compatible.")
                     else:
@@ -115,16 +124,25 @@ st.divider()
 
 # --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
 st.header("📝 Registrar Alerta de Mascota")
-st.write("Subí la foto y detallá cuándo y dónde se vio al perrito por última vez.")
-img_file = st.file_uploader("Subí la foto del perro", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
+st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
+
+# CASILLEROS NUEVOS CON RECOMENDACIONES DE LOS VECINOS
+tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
+img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
+nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
+raza_perro = st.text_input("Raza (Ej: Cruza, Caniche, Ovejero)")
+color_perro = st.text_input("Color principal del pelaje")
+detalles_perro = st.text_area("Detalles particulares (Ej: Tiene collar rojo, renguea de una pata, es asustadizo)")
+
+st.write("---")
+st.write("📋 Datos del Responsable:")
 nombre_rescatista = st.text_input("Nombre del Dueño / Rescatista")
-lugar_hecho = st.text_input("¿Dónde se extravió / encontró? (Ej: Barrio Satélite, Moreno)")
+lugar_hecho = st.text_input("¿Dónde ocurrió? (Ej: Barrio Satélite, Moreno)")
 fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
 telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)")
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
-        # Dejamos el número de teléfono exactamente como lo escribe el usuario de forma limpia
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
         file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
@@ -151,6 +169,11 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
                 nueva_mascota = {
+                    "tipo_alerta": tipo_alerta,
+                    "nombre_perro": nombre_perro if nombre_perro else "No especificado",
+                    "raza": raza_perro if raza_perro else "No especificada",
+                    "color": color_perro if color_perro else "No especificado",
+                    "detalles": detalles_perro if detalles_perro else "Sin detalles",
                     "nombre_dueño": nombre_rescatista,
                     "zona": lugar_hecho,
                     "contacto": num_limpio,
@@ -166,7 +189,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la red nacional.")
                 st.rerun()
     else:
-        st.warning("⚠️ Todos los campos principales son obligatorios.")
+        st.warning("⚠️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
 
 st.divider()
 
@@ -183,27 +206,3 @@ else:
             if foto_gal_b64 and foto_gal_b64 != "error" and "http" not in str(foto_gal_b64):
                 try:
                     bytes_gal = base64.b64decode(foto_gal_b64)
-                    st.image(bytes_gal, width=150)
-                except:
-                    st.text("📷 Foto no disponible")
-            else:
-                st.text("📷 Registro antiguo no disponible")
-        with col_info:
-            nombre_galeria = mascara.get('nombre_dueño', 'Anónimo')
-            st.markdown(f"**👤 Responsable:** {nombre_galeria}")
-            st.markdown(f"**📍 Lugar del hecho:** {mascara.get('zona', 'No especificado')}")
-            st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
-            st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
-            
-            # EXTRACCIÓN DE NÚMERO DIRECTO EN LA GALERÍA
-            num_destino = mascara.get('contacto', '')
-            st.markdown("**📱 Teléfono:**")
-            st.code(f"{num_destino}", language="text")
-        st.divider()
-
-st.divider()
-
-# --- 4️⃣ SECCIÓN DE DONACIONES ---
-st.header("💝 Apoyá a Misión Mascotas")
-st.write("Tu donación nos ayuda a mantener los servidores online las 24 horas.")
-st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
