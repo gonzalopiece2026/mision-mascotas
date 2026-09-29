@@ -73,8 +73,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción lineal aplanada de NumPy nativa indestructible
-                    porcentaje = float(np.ravel(similitud)) * 100
+                    # EXTRACTOR MATHEMATICO BLINDADO: Extrae el valor escalar puro rompiendo los corchetes dobles de Scikit-Learn
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -96,16 +96,14 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.code(f"{numero_match}", language="text")
                     st.write("") 
                     
-                    # RENDERIZADO EN BASE64 DIRECTO PARA EL MATCH
+                    # RENDERIZADO EN BASE64 PARA EL MATCH
                     foto_b64 = mejor_coincidencia.get('ruta_imagen', '')
-                    if foto_b64 and foto_b64 != "error" and "http" not in str(foto_b64):
+                    if foto_b64 and foto_b64 != "error":
                         try:
                             bytes_decor = base64.b64decode(foto_b64)
-                            st.image(bytes_decor, caption="Foto oficial de la coincidencia encontrada", use_container_width=True)
+                            st.image(bytes_decor, caption="Foto oficial del cruce inteligente", use_container_width=True)
                         except:
-                            st.warning("📷 Archivo de imagen dañado en origen.")
-                    else:
-                        st.warning("📷 La foto de este registro no está disponible.")
+                            st.text("📷 Foto no compatible")
                 else:
                     st.error("❌ No se encontraron coincidencias similares en el sistema.")
     else:
@@ -117,7 +115,7 @@ st.divider()
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
-# CASILLEROS COMUNITARIOS COMPLETOS FIJOS EN INTERNET
+# CASILLEROS COMUNITARIOS COMPLETOS FIJOS EN MULTI-COLUMNA NATIVA
 tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
 img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
 nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
@@ -136,7 +134,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
+        file_bytes = np.asarray(bytearray(img_file.read()), np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
@@ -144,9 +142,8 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         if huella is None:
             st.error("❌ Ocurrió un problema al procesar la imagen.")
         else:
-            with st.spinner("Procesando y encriptando imagen en memoria viva..."):
+            with st.spinner("Procesando y encriptando imagen de forma nativa viva..."):
                 try:
-                    # Encriptamos el buffer nativo de la imagen en texto eterno Base64 libre de carpetas
                     _, buffer = cv2.imencode('.jpg', img_bgr)
                     foto_b64_string = base64.b64encode(buffer).decode('utf-8')
                 except Exception as b64_err:
@@ -169,7 +166,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "nombre_dueño": str(nombre_rescatista),
                     "zona": str(lugar_hecho),
                     "contacto": str(num_limpio),
-                    "ruta_imagen": str(foto_b64_string), # Guardamos la cadena cifrada nativa
+                    "ruta_imagen": str(foto_b64_string),
                     "huella": huella,
                     "fecha_hecho": str(fecha_hecho_str),
                     "fecha_subida": str(fecha_subida_str)
@@ -178,20 +175,24 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 bd = cargar_base_datos()
                 bd.append(nueva_mascota)
                 guardar_base_datos(bd)
-                st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la red nacional.")
+                st.success("✅ ¡Éxito! Mascota registrada de forma instantánea en la red federal.")
                 st.rerun()
     else:
         st.warning("⚠️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL (FORMATO PIZARRA VERTICAL TIPO TELEVISIÓN FIJA) ---
+# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL (FORMATO PLACA DE TELEVISIÓN COMPLETA FIJA) ---
 st.header("🖼️ Galería Nacional de Mascotas Alertas")
 bd = cargar_base_datos()
 if not bd:
-    st.info("📭 No hay alertas registradas en este momento. Las nuevas aparecerán acá.")
+    st.info("📭 No hay alertas registradas en este momento en el archivo permanente. Las nuevas aparecerán acá de inmediato.")
 else:
     for mascara in reversed(bd):
-        # Cada registro se clava en un contenedor gris fijo indestructible tipo noticiero
+        # Cada perrito se clava en un contenedor gris destacado tipo cartelera de noticiero
         with st.container(border=True):
             t_alerta = mascara.get('tipo_alerta', 'Perdido')
+            cartel_galeria = "🔴 MASCOTA PERDIDA" if t_alerta == "Perdido" else "🟢 MASCOTA ENCONTRADA"
+            st.markdown(f"## {cartel_galeria}")
+            
+            # Ficha técnica unificada fija arriba de la foto
