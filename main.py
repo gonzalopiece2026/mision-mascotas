@@ -72,7 +72,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(similitud) * 100
+                    
+                    # CORRECCIÓN DE FIJACIÓN INTEGRAL: Extraemos la posición exacta rompiendo las dos cajas de corchetes
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -88,7 +90,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # CORRECCIÓN ENLACE EN BUSCADOR: Formato nativo abre la app de WhatsApp directo en celulares
+                    # CORRECCIÓN ENLACE EN BUSCADOR: Formato nativo abre la app de WhatsApp directo en celulares sin rebotes
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
@@ -204,5 +206,3 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
-            # CORRECCIÓN ENLACE EN GALERÍA: Formato wa.me/ nativo para celulares
-            num_destino = mascara.get('contacto', '')
