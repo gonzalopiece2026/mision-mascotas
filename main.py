@@ -73,9 +73,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción lineal aplanada de NumPy nativa
-                    valor_plano = float(np.ravel(similitud))
-                    porcentaje = valor_plano * 100
+                    # Extracción matemática nativa libre de errores de array
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -116,7 +115,7 @@ st.divider()
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
-# CASILLEROS COMUNITARIOS COMPLETOS
+# CASILLEROS COMUNITARIOS COMPLETOS FIJOS
 tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
 img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
 nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
@@ -159,18 +158,18 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
                 nueva_mascota = {
-                    "tipo_alerta": tipo_alerta,
-                    "nombre_perro": nombre_perro if nombre_perro else "No especificado",
-                    "raza": raza_perro if raza_perro else "No específica",
-                    "color": color_perro if color_perro else "No especificado",
-                    "detalles": detalles_perro if detalles_perro else "Sin detalles",
-                    "nombre_dueño": nombre_rescatista,
-                    "zona": lugar_hecho,
-                    "contacto": num_limpio,
-                    "ruta_imagen": foto_b64_string,
+                    "tipo_alerta": str(tipo_alerta),
+                    "nombre_perro": str(nombre_perro) if nombre_perro else "No especificado",
+                    "raza": str(raza_perro) if raza_perro else "No específica",
+                    "color": str(color_perro) if color_perro else "No especificado",
+                    "detalles": str(detalles_perro) if detalles_perro else "Sin detalles",
+                    "nombre_dueño": str(nombre_rescatista),
+                    "zona": str(lugar_hecho),
+                    "contacto": str(num_limpio),
+                    "ruta_imagen": str(foto_b64_string),
                     "huella": huella,
-                    "fecha_hecho": fecha_hecho_str,
-                    "fecha_subida": fecha_subida_str
+                    "fecha_hecho": str(fecha_hecho_str),
+                    "fecha_subida": str(fecha_subida_str)
                 }
                 
                 bd = cargar_base_datos()
@@ -183,24 +182,19 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL ---
+# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL (FORMATO DE PANTALLA DE TELEVISIÓN FIJA) ---
 st.header("🖼️ Galería Nacional de Mascotas Alertas")
 bd = cargar_base_datos()
 if not bd:
     st.info("📭 No hay alertas registradas en este momento. Las nuevas aparecerán acá.")
 else:
     for mascara in reversed(bd):
-        col_img, col_info = st.columns(2)
-        with col_img:
-            foto_gal_b64 = mascara.get("ruta_imagen", "")
-            if foto_gal_b64 and foto_gal_b64 != "error":
-                try:
-                    bytes_gal = base64.b64decode(foto_gal_b64)
-                    st.image(bytes_gal, width=150)
-                except:
-                    st.text("📷 Foto no disponible")
-            else:
-                st.text("📷 Registro antiguo no disponible")
-        with col_info:
+        # Creamos una tarjeta destacada fija tipo recuadro de noticiero
+        with st.container(border=True):
             t_alerta = mascara.get('tipo_alerta', 'Perdido')
-            cartel_galeria = "🔴 PERDIDO" if t_alerta == "Perdido" else "🟢 ENCONTRADO"
+            cartel_galeria = "🔴 MASCOTA PERDIDA" if t_alerta == "Perdido" else "🟢 MASCOTA ENCONTRADA"
+            st.markdown(f"## {cartel_galeria}")
+            
+            col_info, col_img = st.columns([3, 2])
+            with col_info:
+                st.markdown(f"**🐾 Nombre:** {mascara.get('nombre_perro', 'No especificado')}")
