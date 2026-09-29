@@ -94,7 +94,7 @@ async def ejecutar_robot_global(palabra_clave):
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA CON NUEVO APARTADO DE DONACIONES ---
+# --- INTERFAZ GRÁFICA NATIVA ---
 pestaña_buscar, pestaña_registrar, pestaña_robot, pestaña_donar = st.tabs([
     "🔎 BUSCAR", 
     "📝 ALERTA", 
@@ -104,19 +104,15 @@ pestaña_buscar, pestaña_registrar, pestaña_robot, pestaña_donar = st.tabs([
 
 with pestaña_donar:
     st.subheader("💝 Apoyá a Misión Mascotas")
-    st.write("""
-    Esta plataforma es **100% gratuita y libre de publicidad** para ayudar a que más familias vuelvan a encontrarse. 
-    Tu donación nos ayuda directamente a mantener los servidores online las 24 horas y seguir mejorando la Inteligencia Artificial.
-    """)
+    st.write("Esta plataforma es 100% gratuita y libre de publicidad para ayudar a que más familias vuelvan a encontrarse.")
+    st.write("Tu donación nos ayuda directamente a mantener los servidores online las 24 horas y seguir mejorando la Inteligencia Artificial.")
     
     st.divider()
     
     st.markdown("### 💳 Transferencia Directa (Cualquier Banco o Billetera)")
-    st.info("""
-    * **Alias:** `TU.ALIAS.AQUÍ` *(Cambiá esto por el alias de tu cuenta)*
-    * **CBU:** `0000000000000000000000` *(Cambiá esto por tu CBU real)*
-    * **Titular:** Gonzalo
-    """)
+    st.text("Alias: TU.ALIAS.AQUÍ (Cambiá esto por el alias de tu cuenta)")
+    st.text("CBU: 0000000000000000000000 (Cambiá esto por tu CBU real)")
+    st.text("Titular: Gonzalo")
     
     st.divider()
     
@@ -125,11 +121,11 @@ with pestaña_donar:
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.link_button("☕ Invitar un Cafecito ($1.000)", "https://link-de-mercado-pago-de-1000")
+        st.link_button("☕ Cafecito ($1.000)", "https://link-de-mercado-pago-de-1000")
     with col2:
-        st.link_button("🍔 Colaboración Media ($3.000)", "https://link-de-mercado-pago-de-3000")
+        st.link_button("🍔 Combo ($3.000)", "https://link-de-mercado-pago-de-3000")
     with col3:
-        st.link_button("💎 Súper Colaboración ($5.000)", "https://link-de-mercado-pago-de-5000")
+        st.link_button("💎 Súper ($5.000)", "https://link-de-mercado-pago-de-5000")
 
 with pestaña_robot:
     st.subheader("Configuración del Robot Rastreador")
@@ -215,5 +211,5 @@ with pestaña_buscar:
                     if mejor_coincidencia and mayor_porcentaje > 65:
                         st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                         
-                        st.info(f"""
-                        👤 **Responsable:** {mejor_coincidencia['nombre_dueño']}
+                        st.info(f"👤 Responsable: {mejor_coincidencia['nombre_dueño']} \n📍 Ubicación: {mejor_coincidencia['zona']} \n🔗 Link de origen: {mejor_coincidencia['link_redes']}")
+                        
