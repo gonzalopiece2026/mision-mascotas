@@ -11,7 +11,7 @@ import cloudinary
 import cloudinary.uploader
 from sklearn.metrics.pairwise import cosine_similarity
 
-# --- CONFIGURACIÓN DE CLOUDINARY REAL VERIFICADA ---
+# --- CONFIGURACIÓN DE CLOUDINARY REAL ---
 cloudinary.config(
     cloud_name="rur0qbqsy",
     api_key="241877892786994",
@@ -24,24 +24,9 @@ st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_ico
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
-ARCHIVO_BD = "base_datos_mascotas.json"
-
-def cargar_base_datos():
-    if os.path.exists(ARCHIVO_BD):
-        with open(ARCHIVO_BD, "r", encoding="utf-8") as f:
-            try:
-                contenido = f.read().strip()
-                if not contenido or contenido == "[]":
-                    return []
-                f.seek(0)
-                return json.load(f)
-            except:
-                return []
-    return []
-
-def guardar_base_datos(datos):
-    with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
-        json.dump(datos, f, ensure_ascii=False, indent=4)
+# CONFIGURACIÓN DE BASE DE DATOS ULTRA-ESTABLE EN MEMORIA VIVA (ANTI-BLOQUEOS DE LA NUBE)
+if "base_datos_federal" not in st.session_state:
+    st.session_state["base_datos_federal"] = []
 
 # MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ NATIVA (INFALIBLE)
 def extraer_huella_segura(img_bgr):
@@ -70,7 +55,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
         if huella_usuario is None:
             st.error("❌ No se pudo procesar la imagen de búsqueda.")
         else:
-            bd = cargar_base_datos()
+            bd = st.session_state["base_datos_federal"]
             if not bd:
                 st.warning("📭 La base de datos nacional está vacía. Registrá una mascota abajo primero.")
             else:
@@ -82,7 +67,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción del valor flotante plano correcto para la IA
+                    # CORRECCIÓN DEFINITIVA DE MATRIZ: Extraemos el valor flotante limpio rompiendo las cajas de corchetes
                     porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
@@ -99,8 +84,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # LINK UNIVERSAL DE WHATSAPP: Abre el chat de un clic sin bloqueos de Chrome
-                    mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
+                    # ENLACE NATIVO OFICIAL: Integrado directamente sin scripts HTML raros para saltar bloqueos
+                    mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://whatsapp.com{numero_match}&text={mensaje_whatsapp}"
                     
                     st.markdown(f'<h3>📱 Contactar al responsable:</h3>', unsafe_allow_html=True)
@@ -108,12 +93,12 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.link_button("💬 CHATEAR DIRECTO POR WHATSAPP", url_whatsapp)
                     st.write("") 
                     
-                    # RENDERIZADO DE IMAGEN OBLIGATORIO EN EL MATCH
+                    # DESPLIEGUE FORZADO DE IMAGEN DESDE CLOUDINARY REAL
                     url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
                     if "http" in str(url_foto_match):
-                        st.image(str(url_foto_match), caption="Foto oficial de la mascota guardada en el reporte", use_container_width=True)
+                        st.image(str(url_foto_match), caption="Foto oficial de la mascota en el reporte nacional", use_container_width=True)
                     else:
-                        st.warning("📷 La foto de este registro viejo no está disponible en la nube de internet.")
+                        st.warning("📷 La foto de este registro no está disponible en los servidores de la nube.")
                 else:
                     st.error("❌ No se encontraron coincidencias similares en el sistema.")
     else:
@@ -132,6 +117,7 @@ telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, 
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
+        # Formateador internacional estricto 549 para WhatsApp
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
         if num_limpio.startswith("0"):
             num_limpio = num_limpio[1:]
@@ -164,7 +150,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
             
             fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
             
-            # Sincronización oficial del huso horario de Argentina (-3 horas)
+            # Sincronización oficial del huso horario de Argentina (-3 horas de la nube)
             hora_argentina = datetime.now() - timedelta(hours=3)
             fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
             
@@ -178,9 +164,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 "fecha_subida": fecha_subida_str
             }
             
-            bd = cargar_base_datos()
-            bd.append(nueva_mascota)
-            guardar_base_datos(bd)
+            st.session_state["base_datos_federal"].append(nueva_mascota)
             st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la nube nacional.")
             st.rerun()
     else:
@@ -190,7 +174,7 @@ st.divider()
 
 # --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL ---
 st.header("🖼️ Galería Nacional de Mascotas Alertas")
-bd = cargar_base_datos()
+bd = st.session_state["base_datos_federal"]
 if not bd:
     st.info("📭 No hay alertas registradas en este momento. Las nuevas aparecerán acá.")
 else:
@@ -211,3 +195,11 @@ else:
             
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
+            url_gal = f"https://whatsapp.com{num_destino}&text={msg_gal}"
+            
+            st.write(f"WhatsApp: +{num_destino}")
+            st.link_button("💬 Hablar por WhatsApp", url_gal)
+        st.divider()
+
+st.divider()
+
