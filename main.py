@@ -81,9 +81,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    
-                    # CORRECCIÓN MAESTRA EXTRA: Extraemos el escalar de la matriz bidimensional de scikit-learn
-                    porcentaje = float(similitud[0][0]) * 100
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -91,22 +89,33 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                         
                 if mejor_coincidencia and mayor_porcentaje > 65:
                     st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
-                    st.info(f"👤 Responsable: {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 Lugar del hecho: {mejor_coincidencia.get('zona', 'No especificada')} \n📅 Fecha: {mejor_coincidencia.get('fecha_hecho', 'No especificada')}")
                     
-                    # LINK HTML LIMPIO EN UN SOLO RENGLÓN: Anti-bloqueo total para Chrome
+                    fecha_hecho_match = mejor_coincidencia.get('fecha_hecho', 'No especificada')
+                    zona_match = mejor_coincidencia.get('zona', 'No especificada')
+                    responsable_match = mejor_coincidencia.get('nombre_dueño', 'Anónimo')
                     numero_match = mejor_coincidencia.get('contacto', '')
-                    mensaje_whatsapp = urllib.parse.quote("¡Hola! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
-                    url_whatsapp = f"https://whatsapp.com{numero_match}&text={mensaje_whatsapp}"
                     
-                    boton_html = f'<a href="{url_whatsapp}" style="text-decoration:none;"><div style="background-color:#25d366; color:white; padding:12px 20px; text-align:center; border-radius:8px; font-weight:bold; font-family:sans-serif; margin-bottom:15px; font-size:16px;">💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO</div></a>'
-                    st.markdown(boton_html, unsafe_allow_html=True)
+                    st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
+                    
+                    # SISTEMA DE COPIADO INTELIGENTE ANTIM BLOQUEOS DE CHROME
+                    mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
+                    link_final_wa = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
+                    
+                    st.subheader("📱 Datos de Contacto Directo")
+                    st.code(f"Número del dueño: +{numero_match}", language="text")
+                    
+                    # Botón nativo que guarda el enlace directo en el portapapeles sin abrir pestañas secundarias
+                    st.copy_to_clipboard(link_final_wa)
+                    st.success("📋 ¡Enlace de WhatsApp copiado al portapapeles! Abrí una pestaña nueva en tu navegador, pegalo con Ctrl+V (o mantener presionado en el celu) y listo.")
+                    
                     st.write("") 
                     
+                    # DESPLIEGUE DIRECTO NATIVO DE LA IMAGEN DE CLOUDINARY
                     url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
                     if "http" in url_foto_match:
-                        st.image(url_foto_match, caption="Foto de la mascota guardada en el reporte nacional", use_container_width=True)
+                        st.image(url_foto_match, caption="Foto oficial de la mascota cargada en el reporte nacional", use_container_width=True)
                     else:
-                        st.error("📷 La imagen de esta coincidencia no se encuentra disponible en los servidores de la nube.")
+                        st.warning("📷 La foto de este registro viejo no está disponible en la nube de internet.")
                 else:
                     st.error("❌ No se encontraron coincidencias similares en el sistema.")
     else:
@@ -124,7 +133,7 @@ fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
 telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
-    if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
+    if img_file and nombre_rescatista and lugar_hecho and phone_input := telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
         if num_limpio.startswith("0"):
             num_limpio = num_limpio[1:]
@@ -157,6 +166,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
             
             fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
             
+            # Sincronización oficial del huso horario de Argentina (-3 horas)
             hora_argentina = datetime.now() - timedelta(hours=3)
             fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
             
@@ -201,6 +211,3 @@ else:
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
             num_destino = mascara.get('contacto', '')
-            msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
-            url_gal = f"https://whatsapp.com{num_destino}&text={msg_gal}"
-            
