@@ -135,7 +135,7 @@ with pestaña_registrar:
                 huella = extraer_huella(img_bgr)
             
             if huella is None:
-                st.error("❌ La IA no detectó ningún perro en la foto. Intentá con otra imagen donde el perrito se vea más de cerca y de frente.")
+                st.error("❌ La IA no detectó ningún perro en la foto. Intentá con otra imagen más clara.")
             else:
                 os.makedirs("fotos_registradas", exist_ok=True)
                 ruta_foto = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
@@ -177,7 +177,6 @@ with pestaña_buscar:
                         vector_u = np.array(huella_usuario).reshape(1, -1)
                         similitud = cosine_similarity(vector_u, huella_db)
                         
-                        # CORRECCIÓN DEFINITIVA: Extraemos el valor escalar correcto de la matriz
                         porcentaje = float(similitud[0][0]) * 100
                         if porcentaje > mayor_porcentaje:
                             mayor_porcentaje = porcentaje
@@ -204,3 +203,4 @@ with pestaña_buscar:
                         img_res = cv2.imread(mejor_coincidencia["ruta_imagen"])
                         st.image(cv2.cvtColor(img_res, cv2.COLOR_BGR2RGB), caption="Foto registrada en la base de datos")
                     else:
+                        st.error("❌ No se encontraron perros con características similares en la base de datos.")
