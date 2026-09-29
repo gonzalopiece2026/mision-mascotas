@@ -73,7 +73,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción lineal aplanada de NumPy nativa
+                    # Extracción lineal nativa de la matriz
                     valor_plano = float(np.ravel(similitud))
                     porcentaje = valor_plano * 100
                     
