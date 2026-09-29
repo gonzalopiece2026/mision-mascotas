@@ -73,9 +73,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # BLINDAJE MATEMÁTICO CONTRA EL TYPEERROR: Convertimos a un escalar plano usando ravelo de numpy
-                    valor_plano = float(np.ravel(similitud)[0])
-                    porcentaje = valor_plano * 100
+                    # Extracción matemática nativa de la matriz de scikit-learn
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -91,13 +90,10 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # ENLACE DE WHATSAPP BLINDADO CON BARRA DIAGONAL
-                    mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
-                    url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
-                    
-                    st.markdown(f'<h3>📱 Contactar al responsable:</h3>', unsafe_allow_html=True)
-                    st.write(f"Número del dueño: +{numero_match}")
-                    st.link_button("💬 CHATEAR DIRECTO POR WHATSAPP", url_whatsapp)
+                    # SECCIÓN DE CONTACTO EXCLUSIVAMENTE CON COPIA MANUAL REPARADA
+                    st.markdown("### 📱 Teléfono de Contacto:")
+                    st.write("Copiá el número de abajo para comunicarte con el responsable:")
+                    st.code(f"{numero_match}", language="text")
                     st.write("") 
                     
                     # RENDERIZADO EN BASE64 PARA EL MATCH
@@ -124,22 +120,12 @@ img_file = st.file_uploader("Subí la foto del perro", type=["jpg", "jpeg", "png
 nombre_rescatista = st.text_input("Nombre del Dueño / Rescatista")
 lugar_hecho = st.text_input("¿Dónde se extravió / encontró? (Ej: Barrio Satélite, Moreno)")
 fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
-telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
+telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)")
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
+        # Dejamos el número de teléfono exactamente como lo escribe el usuario de forma limpia
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
-        
-        if num_limpio.startswith("0"):
-            num_limpio = num_limpio[1:]
-        if num_limpio.startswith("15"):
-            num_limpio = num_limpio[2:]
-        if num_limpio.startswith("54"):
-            num_limpio = num_limpio[2:]
-            if num_limpio.startswith("9"):
-                num_limpio = num_limpio[1:]
-                
-        num_final_ar = "549" + num_limpio
                 
         file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
@@ -167,7 +153,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 nueva_mascota = {
                     "nombre_dueño": nombre_rescatista,
                     "zona": lugar_hecho,
-                    "contacto": num_final_ar,
+                    "contacto": num_limpio,
                     "ruta_imagen": foto_b64_string,
                     "huella": huella,
                     "fecha_hecho": fecha_hecho_str,
@@ -209,3 +195,15 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
+            # EXTRACCIÓN DE NÚMERO DIRECTO EN LA GALERÍA
+            num_destino = mascara.get('contacto', '')
+            st.markdown("**📱 Teléfono:**")
+            st.code(f"{num_destino}", language="text")
+        st.divider()
+
+st.divider()
+
+# --- 4️⃣ SECCIÓN DE DONACIONES ---
+st.header("💝 Apoyá a Misión Mascotas")
+st.write("Tu donación nos ayuda a mantener los servidores online las 24 horas.")
+st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
