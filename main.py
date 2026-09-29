@@ -1,6 +1,7 @@
 import os
 import cv2
 import json
+import time
 import asyncio
 import urllib.parse
 from datetime import datetime, timedelta
@@ -82,7 +83,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # CORRECCIÓN MAESTRA DE ENLACE: Reemplazado por wa.me con barra diagonal limpia sin guiones raros
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
@@ -91,7 +91,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.link_button("💬 CHATEAR DIRECTO POR WHATSAPP", url_whatsapp)
                     st.write("") 
                     
-                    # DESPLIEGUE DIRECTO NATIVO DE LA IMAGEN DE CLOUDINARY
                     url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
                     if "http" in str(url_foto_match):
                         st.image(str(url_foto_match), caption="Foto oficial de la mascota en el reporte nacional", use_container_width=True)
@@ -134,35 +133,40 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         if huella is None:
             st.error("❌ Ocurrió un problema al procesar la imagen.")
         else:
+            ruta_foto_cloudinary = "error"
             with st.spinner("Subiendo imagen de forma segura a la nube de Cloudinary..."):
                 try:
                     cv2.imwrite("temp_upload.jpg", img_bgr)
-                    resultado_upload = cloudinary.uploader.upload("temp_upload.jpg")
-                    ruta_foto_cloudinary = resultado_upload["secure_url"]
+                    # CORRECCIÓN MAESTRA: Forzamos la subida síncrona obligatoria para que retenga el archivo
+                    resultado_upload = cloudinary.uploader.upload("temp_upload.jpg", resource_type="image")
+                    ruta_foto_cloudinary = resultado_upload.get("secure_url", "error")
+                    time.sleep(2) # Espera técnica para asegurar el renderizado
                     if os.path.exists("temp_upload.jpg"):
                         os.remove("temp_upload.jpg")
                 except Exception as upload_err:
                     print(f"Error al subir: {upload_err}")
-                    ruta_foto_cloudinary = "error"
             
-            fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
-            
-            hora_argentina = datetime.now() - timedelta(hours=3)
-            fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
-            
-            nueva_mascota = {
-                "nombre_dueño": nombre_rescatista,
-                "zona": lugar_hecho,
-                "contacto": num_limpio,
-                "ruta_imagen": str(ruta_foto_cloudinary),
-                "huella": huella,
-                "fecha_hecho": fecha_hecho_str,
-                "fecha_subida": fecha_subida_str
-            }
-            
-            st.session_state["base_datos_federal"].append(nueva_mascota)
-            st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la nube nacional.")
-            st.rerun()
+            if ruta_foto_cloudinary == "error" or not ruta_foto_cloudinary:
+                st.error("❌ Error de conexión con el servidor de imágenes. Intenta de nuevo.")
+            else:
+                fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
+                hora_argentina = datetime.now() - timedelta(hours=3)
+                fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
+                
+                nueva_mascota = {
+                    "nombre_dueño": nombre_rescatista,
+                    "zona": lugar_hecho,
+                    "contacto": num_limpio,
+                    "ruta_imagen": str(ruta_foto_cloudinary),
+                    "huella": huella,
+                    "fecha_hecho": fecha_hecho_str,
+                    "fecha_subida": fecha_subida_str
+                }
+                
+                st.session_state["base_datos_federal"].append(nueva_mascota)
+                st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la nube nacional.")
+                time.sleep(1)
+                st.rerun()
     else:
         st.warning("⚠️ Todos los campos principales son obligatorios.")
 
@@ -189,7 +193,6 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
-            # CORRECCIÓN ENLACE EN GALERÍA TAMBIÉN
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
             url_gal = f"https://wa.me{num_destino}?text={msg_gal}"
@@ -201,6 +204,3 @@ else:
 st.divider()
 
 # --- 4️⃣ SECCIÓN DE DONACIONES ---
-st.header("💝 Apoyá a Misión Mascotas")
-st.write("Tu donación nos ayuda a mantener los servidores online las 24 horas.")
-st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
