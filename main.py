@@ -81,7 +81,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(similitud) * 100
+                    
+                    # CORRECCIÓN MAESTRA EXTRA: Extraemos el escalar de la matriz bidimensional de scikit-learn
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -91,7 +93,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                     st.info(f"👤 Responsable: {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 Lugar del hecho: {mejor_coincidencia.get('zona', 'No especificada')} \n📅 Fecha: {mejor_coincidencia.get('fecha_hecho', 'No especificada')}")
                     
-                    # LINK HTML LIMPIO EN UN SOLO RENGLÓN: Elimina las comillas triples para evitar SyntaxError
+                    # LINK HTML LIMPIO EN UN SOLO RENGLÓN: Anti-bloqueo total para Chrome
                     numero_match = mejor_coincidencia.get('contacto', '')
                     mensaje_whatsapp = urllib.parse.quote("¡Hola! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://whatsapp.com{numero_match}&text={mensaje_whatsapp}"
@@ -198,7 +200,6 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
-            # BOTÓN DE GALERÍA CORREGIDO: En un solo renglón limpio libre de errores de sintaxis
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
             url_gal = f"https://whatsapp.com{num_destino}&text={msg_gal}"
