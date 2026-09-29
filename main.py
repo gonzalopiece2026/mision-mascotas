@@ -9,8 +9,6 @@ import streamlit as st
 import requests
 import cloudinary
 import cloudinary.uploader
-from ultralytics import YOLO
-from sklearn.metrics.pairwise import cosine_similarity
 
 # --- CONFIGURACIÓN DE CLOUDINARY REAL (DATOS DE TU CAPTURA) ---
 cloudinary.config(
@@ -28,6 +26,7 @@ st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento 
 # Cargamos la IA y la base de datos
 @st.cache_resource
 def cargar_modelo():
+    from ultralytics import YOLO
     return YOLO("yolov8n.pt")
 
 modelo = cargar_modelo()
@@ -125,39 +124,32 @@ with pestaña_galeria:
         for mascota in reversed(bd):
             col_img, col_info = st.columns(2)
             with col_img:
-                if "http" in mascota["ruta_imagen"]:
+                if "http" in mascota.get("ruta_imagen", ""):
                     st.image(mascota["ruta_imagen"], width=150)
                 else:
-                    if os.path.exists(mascota["ruta_imagen"]):
-                        st.image(mascota["ruta_imagen"], width=150)
-                    else:
-                        st.text("📷 Foto no disponible")
+                    st.text("📷 Foto no disponible")
             with col_info:
-                st.markdown(f"**👤 Responsable:** {mascota['nombre_dueño']}")
-                st.markdown(f"**📍 Lugar del hecho:** {mascota['zona']}")
-                fecha_hecho = mascota.get("fecha_hecho", "No especificada")
-                fecha_subida = mascota.get("fecha_subida", "No especificada")
-                st.markdown(f"**📅 Ocurrió el:** {fecha_hecho}")
-                st.markdown(f"**⏰ Subido el:** {fecha_subida}")
+                st.markdown(f"**👤 Responsable:** {mascota.get('nombre_dueño', 'Anónimo')}")
+                st.markdown(f"**📍 Lugar del hecho:** {mascota.get('zona', 'No especificada')}")
+                st.markdown(f"**📅 Ocurrió el:** {mascota.get('fecha_hecho', 'No especificada')}")
+                st.markdown(f"**⏰ Subido el:** {mascota.get('fecha_subida', 'No especificada')}")
                 
-                msg_galeria = urllib.parse.quote(f"¡Hola {mascota['nombre_dueño']}! Vi la foto de la mascota que publicaste el {fecha_hecho} en la zona de {mascota['zona']} a través de Misión Mascotas. ¿Sigue activa la búsqueda?")
-                url_galeria = f"https://wa.me{mascota['contacto']}?text={msg_galeria}"
-                st.link_button(f"💬 Hablar con {mascota['nombre_dueño']}", url_galeria)
+                msg_galeria = urllib.parse.quote("¡Hola! Vi la foto de la mascota publicada en Misión Mascotas. ¿Sigue activa la búsqueda?")
+                url_galeria = f"https://wa.me{mascota.get('contacto', '')}?text={msg_galeria}"
+                st.link_button("💬 Hablar por WhatsApp", url_galeria)
             st.divider()
 
 with pestaña_donar:
     st.subheader("💝 Apoyá a Misión Mascotas")
     st.write("Esta plataforma es 100% gratuita y libre de publicidad para ayudar a que más familias vuelvan a encontrarse.")
-    st.write("Tu donación nos ayuda directamente a mantener los servidores online las 24 horas y seguir mejorando la Inteligencia Artificial.")
+    st.write("Tu donación nos ayuda directamente a mantener los servidores online las 24 horas.")
     st.divider()
     st.markdown("### 🚀 Mercado Pago (Monto Libre)")
-    st.write("Hacé clic en el botón de abajo para colaborar con el monto que vos elijas de forma segura:")
-    st.write("") 
     st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
 
 with pestaña_robot:
     st.subheader("Configuración del Robot Rastreador")
-    st.write("Escribí qué querés que el robot busque en internet (ej: perro perdido Moreno, perrito extraviado Avellaneda).")
+    st.write("Escribí qué querés que el robot busque en internet (ej: perro perdido Moreno).")
     termino_busqueda = st.text_input("Palabras clave de búsqueda:", value="perro perdido Moreno")
     if st.button("🚀 INICIAR RASTREO INTELIGENTE"):
         with st.spinner("El robot está buscando imágenes públicas en la red... Esperá unos segundos."):
@@ -167,22 +159,22 @@ with pestaña_robot:
         if fotos_bajadas == -1:
             st.error("❌ Ocurrió un problema de red al procesar la solicitud.")
         elif fotos_bajadas == 0:
-            st.warning("⚠️ No se pudieron extraer imágenes en este intento. Probá afinando o cambiando las palabras clave.")
+            st.warning("⚠️ No se pudieron extraer imágenes en este intento.")
         else:
-            st.success(f"🤖 ¡Robot finalizado con éxito! Se completó el rastreo y se descargaron {fotos_bajadas} fotos nuevas.")
+            st.success(f"🤖 ¡Robot finalizado con éxito! Se descargaron {fotos_bajadas} fotos nuevas.")
 
 with pestaña_registrar:
     st.subheader("Registrar Alerta de Mascota")
     st.write("Subí la foto y detallá cuándo y dónde se vio al perrito por última vez.")
     img_file = st.file_uploader("Subí la foto del perro", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
-    nombre = st.text_input("Nombre del Dueño / Rescatista")
-    zona = st.text_input("¿Dónde se extravió / encontró? (Ej: Barrio Satélite, Moreno, Buenos Aires)")
+    nombre_rescatista = st.text_input("Nombre del Dueño / Rescatista")
+    lugar_hecho = st.text_input("¿Dónde se extravió / encontró? (Ej: Barrio Satélite, Moreno)")
     fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
-    contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
-    link = st.text_input("Link de la Publicación (Opcional)")
+    telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
+    
     if st.button("Guardar en la Red Nacional"):
-        if img_file and nombre and zona and contacto:
-            contacto_limpio = "".join(filter(str.isdigit, contacto))
+        if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
+            contacto_limpio = "".join(filter(str.isdigit, telefono_contacto))
             file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
             
@@ -190,9 +182,9 @@ with pestaña_registrar:
                 huella = extraer_huella(img_bgr)
             
             if huella is None:
-                st.error("❌ La IA no detectó ningún perro en la foto. Intentá con otra imagen más clara.")
+                st.error("❌ La IA no detectó ningún perro en la foto.")
             else:
-                with st.spinner("Subiendo imagen de forma segura a la nube de Cloudinary..."):
+                with st.spinner("Subiendo imagen de forma segura a la nube..."):
                     try:
                         cv2.imwrite("temp_upload.jpg", img_bgr)
                         resultado_upload = cloudinary.uploader.upload("temp_upload.jpg")
@@ -200,15 +192,29 @@ with pestaña_registrar:
                         if os.path.exists("temp_upload.jpg"):
                             os.remove("temp_upload.jpg")
                     except Exception as upload_err:
-                        st.error(f"Error al blindar en la nube: {upload_err}")
-                        ruta_foto_cloudinary = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
-                        cv2.imwrite(ruta_foto_cloudinary, img_bgr)
+                        st.error(f"Error al subir: {upload_err}")
+                        ruta_foto_cloudinary = "error"
                 
                 fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
                 fecha_subida_str = datetime.now().strftime("%d/%m/%Y a las %H:%M hs")
                 
+                # Armamos el bloque limpio uno por uno para que no tire errores de llaves jamás
+                nueva_mascota = {}
+                nueva_mascota["nombre_dueño"] = nombre_rescatista
+                nueva_mascota["zona"] = lugar_hecho
+                nueva_mascota["contacto"] = contacto_limpio
+                nueva_mascota["ruta_imagen"] = ruta_foto_cloudinary
+                nueva_mascota["huella"] = huella
+                nueva_mascota["fecha_hecho"] = fecha_hecho_str
+                nueva_mascota["fecha_subida"] = fecha_subida_str
+                
                 bd = cargar_base_datos()
-                bd.append({
-                    "nombre_dueño": nombre,
-                    "zona": zona,
-                    "contacto": contacto_limpio,
+                bd.append(nueva_mascota)
+                guardar_base_datos(bd)
+                st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la nube nacional.")
+        else:
+            st.warning("⚠️ Todos los campos principales son obligatorios.")
+
+with pestaña_buscar:
+    st.subheader("Buscar Coincidencias Visuales")
+    st.write("Subí la foto de un perro para contrastarlo con la base de datos.")
