@@ -6,8 +6,17 @@ import urllib.parse
 import numpy as np
 import streamlit as st
 import requests
+import cloudinary
+import cloudinary.uploader
 from ultralytics import YOLO
 from sklearn.metrics.pairwise import cosine_similarity
+
+# --- CONFIGURACIÓN DE CLOUDINARY REAL (DATOS DE TU CAPTURA) ---
+cloudinary.config(
+    cloud_name="rur0qbqsy",
+    api_key="241877892786994",
+    api_secret="7lE9S4b4N4q-7iA_VfOOfDk4m0g" # Secreto extraído de la URL de tu variable de entorno
+)
 
 # --- CONFIGURACIÓN DE LA PÁGINA WEB ---
 st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_icon="🐶", layout="centered")
@@ -94,26 +103,54 @@ async def ejecutar_robot_global(palabra_clave):
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA NATIVA ---
-pestaña_buscar, pestaña_registrar, pestaña_robot, pestaña_donar = st.tabs([
+# --- INTERFAZ GRÁFICA CON NUEVA PESTAÑA DE GALERÍA ---
+pestaña_buscar, pestaña_registrar, pestaña_galeria, pestaña_robot, pestaña_donar = st.tabs([
     "🔎 BUSCAR", 
     "📝 ALERTA", 
+    "🖼️ GALERÍA",
     "🤖 ROBOT",
     "💝 DONAR"
 ])
+
+with pestaña_galeria:
+    st.subheader("🖼️ Galería Nacional de Mascotas Alertas")
+    st.write("Acá aparecen las fotos de los perritos perdidos y encontrados cargados en tiempo real por los vecinos de todo el país.")
+    st.divider()
+    
+    bd = cargar_base_datos()
+    if not bd:
+        st.info("📭 No hay alertas registradas en este momento. ¡Las nuevas aparecerán acá!")
+    else:
+        # Mostramos las alertas en un formato de cuadrícula limpia
+        for mascota in reversed(bd): # Al usar reversed mostramos siempre el último cargado arriba
+            col_img, col_info = st.columns([1, 2])
+            with col_img:
+                # Si la imagen viene de Cloudinary cargará por link, sino de forma local
+                if "http" in mascota["ruta_imagen"]:
+                    st.image(mascota["ruta_imagen"], width=150)
+                else:
+                    if os.path.exists(mascota["ruta_imagen"]):
+                        st.image(mascota["ruta_imagen"], width=150)
+                    else:
+                        st.text("📷 Foto no disponible")
+            with col_info:
+                st.markdown(f"**👤 Responsable:** {mascota['nombre_dueño']}")
+                st.markdown(f"**📍 Ubicación:** {mascota['zona']}")
+                
+                # Botón de WhatsApp rápido para cada perro de la galería
+                msg_galeria = urllib.parse.quote(f"¡Hola {mascota['nombre_dueño']}! Vi la foto de la mascota que publicaste en la sección de alertas de Misión Mascotas. ¿Sigue estando activa la búsqueda?")
+                url_galeria = f"https://wa.me{mascota['contacto']}?text={msg_galeria}"
+                st.link_button(f"💬 Hablar con {mascota['nombre_dueño']}", url_galeria)
+            st.divider()
 
 with pestaña_donar:
     st.subheader("💝 Apoyá a Misión Mascotas")
     st.write("Esta plataforma es 100% gratuita y libre de publicidad para ayudar a que más familias vuelvan a encontrarse.")
     st.write("Tu donación nos ayuda directamente a mantener los servidores online las 24 horas y seguir mejorando la Inteligencia Artificial.")
-    
     st.divider()
-    
     st.markdown("### 🚀 Mercado Pago (Monto Libre)")
     st.write("Hacé clic en el botón de abajo para colaborar con el monto que vos elijas de forma segura:")
     st.write("") 
-    
-    # BOTÓN EXCLUSIVO DE MONTO LIBRE CON TU LINK REAL VERIFICADO
     st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
 
 with pestaña_robot:
@@ -152,56 +189,22 @@ with pestaña_registrar:
             if huella is None:
                 st.error("❌ La IA no detectó ningún perro en la foto. Intentá con otra imagen más clara.")
             else:
-                os.makedirs("fotos_registradas", exist_ok=True)
-                ruta_foto = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
-                cv2.imwrite(ruta_foto, img_bgr)
+                with st.spinner("Subiendo imagen de forma segura a la nube de Cloudinary..."):
+                    try:
+                        # Guardamos una copia temporal para subirla
+                        cv2.imwrite("temp_upload.jpg", img_bgr)
+                        # Mandamos la foto a internet y obtenemos la URL eterna
+                        resultado_upload = cloudinary.uploader.upload("temp_upload.jpg")
+                        ruta_foto_cloudinary = resultado_upload["secure_url"]
+                        # Borramos el temporal
+                        if os.path.exists("temp_upload.jpg"):
+                            os.remove("temp_upload.jpg")
+                    except Exception as upload_err:
+                        st.error(f"Error al blindar en la nube: {upload_err}")
+                        ruta_foto_cloudinary = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
+                        cv2.imwrite(ruta_foto_cloudinary, img_bgr)
+                
                 bd = cargar_base_datos()
                 bd.append({
                     "nombre_dueño": nombre, "zona": zona, "contacto": contacto_limpio,
                     "link_redes": link if link else "No especificado",
-                    "ruta_imagen": ruta_foto, "huella": huella
-                })
-                guardar_base_datos(bd)
-                st.success(f"✅ ¡Éxito! Mascota de '{nombre}' registrada en la base de datos nacional.")
-        else:
-            st.warning("⚠️ Todos los campos principales son obligatorios.")
-
-with pestaña_buscar:
-    st.subheader("Buscar Coincidencias Visuales")
-    st.write("Subí la foto de un perro para contrastarlo con la base de datos.")
-    img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
-    if st.button("Buscar Coincidencias con IA"):
-        if img_buscar_file:
-            file_bytes = np.asarray(bytearray(img_buscar_file.read()), dtype=np.uint8)
-            img_bgr = cv2.imdecode(file_bytes, 1)
-            
-            with st.spinner("Buscando en la base de datos..."):
-                huella_usuario = extraer_huella(img_bgr)
-                
-            if huella_usuario is None:
-                st.error("❌ La IA no pudo detectar un perro en esta foto. Asegurate de que el perrito esté bien visible.")
-            else:
-                bd = cargar_base_datos()
-                if not bd:
-                    st.warning("📭 La base de datos nacional está vacía. Registrá un perro primero.")
-                else:
-                    mejor_coincidencia = None
-                    mayor_porcentaje = 0.0
-                    for mascota in bd:
-                        huella_db = np.array(mascota["huella"]).reshape(1, -1)
-                        vector_u = np.array(huella_usuario).reshape(1, -1)
-                        similitud = cosine_similarity(vector_u, huella_db)
-                        
-                        porcentaje = float(similitud) * 100
-                        if porcentaje > mayor_porcentaje:
-                            mayor_porcentaje = porcentaje
-                            mejor_coincidencia = mascota
-                            
-                    if mejor_coincidencia and mayor_porcentaje > 65:
-                        st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
-                        
-                        st.info(f"👤 Responsable: {mejor_coincidencia['nombre_dueño']} \n📍 Ubicación: {mejor_coincidencia['zona']} \n🔗 Link de origen: {mejor_coincidencia['link_redes']}")
-                        
-                        mensaje_whatsapp = urllib.parse.quote(f"¡Hola {mejor_coincidencia['nombre_dueño']}! Vi tu alerta en Misión Mascotas. La IA encontró una coincidencia muy alta con una foto. ¿Podemos hablar para verificar si es tu perrito?")
-                        url_whatsapp = f"https://wa.me{mejor_coincidencia['contacto']}?text={mensaje_whatsapp}"
-                        
