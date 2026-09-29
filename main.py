@@ -17,37 +17,42 @@ st.markdown("""
     <style>
     /* Fondo principal y textos */
     .stApp {
-        background-color: #f7f9fc;
+        background-color: #f4f6f9;
     }
     h1 {
         color: #1e3a8a !important;
         font-family: 'Poppins', sans-serif;
         font-weight: 700;
         text-align: center;
+        margin-bottom: 5px !important;
     }
     .subtitulo {
         text-align: center;
         color: #4b5563;
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         margin-bottom: 2rem;
     }
-    /* Estilo para las pestañas */
+    /* Estilo para ajustar las pestañas y que no se corten */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
+        gap: 8px;
         justify-content: center;
+        display: flex;
+        flex-wrap: wrap; /* Permite que bajen de renglón en celulares en vez de ocultarse */
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #ffffff;
-        border-radius: 8px;
-        padding: 10px 20px;
+        border-radius: 20px; /* Bordes más redondeados y pintorescos */
+        padding: 8px 16px;
         border: 1px solid #e5e7eb;
         font-weight: 600;
         color: #4b5563;
+        font-size: 0.9rem;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #3b82f6 !important;
+        background-color: #2563eb !important;
         color: white !important;
-        border: 1px solid #3b82f6;
+        border: 1px solid #2563eb;
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
     }
     /* Tarjetas de perros encontrados */
     .tarjeta-perro {
@@ -81,8 +86,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por recognition visual con Inteligencia Artificial.</p>", unsafe_allow_html=True)
+st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allowed_html=True)
+st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA.</p>", unsafe_allowed_html=True)
 
 # Cargamos la IA y la base de datos
 @st.cache_resource
@@ -166,11 +171,11 @@ async def ejecutar_robot_global(palabra_clave):
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA (PESTAÑAS) ---
+# --- INTERFAZ GRÁFICA CORREGIDA (Nombres compactos para evitar recortes) ---
 pestaña_buscar, pestaña_registrar, pestaña_robot = st.tabs([
-    "🔎 BUSCADOR INTELIGENTE", 
-    "📝 REGISTRAR NUEVA ALERTA", 
-    "🤖 ROBOT RASTREADOR DE REDES"
+    "🔎 BUSCAR COINCIDENCIA", 
+    "📝 CREAR ALERTA", 
+    "🤖 ROBOT RASTREADOR"
 ])
 
 with pestaña_robot:
@@ -248,8 +253,3 @@ with pestaña_buscar:
                     mejor_coincidencia = None
                     mayor_porcentaje = 0.0
                     
-                    for mascota in bd:
-                        huella_db = np.array(mascota["huella"]).reshape(1, -1)
-                        vector_u = np.array(huella_usuario).reshape(1, -1)
-                        similitud = cosine_similarity(vector_u, huella_db)
-                        porcentaje = float(similitud) * 100
