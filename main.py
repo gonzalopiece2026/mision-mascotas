@@ -97,17 +97,16 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # SISTEMA DE COPIADO INTELIGENTE ANTIM BLOQUEOS DE CHROME
+                    # SISTEMA DE COPIADO INTELIGENTE ANTI-BLOQUEOS
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     link_final_wa = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
                     st.subheader("📱 Datos de Contacto Directo")
                     st.code(f"Número del dueño: +{numero_match}", language="text")
                     
-                    # Botón nativo que guarda el enlace directo en el portapapeles sin abrir pestañas secundarias
+                    # Guarda el enlace en memoria de la PC o celu de forma transparente y nativa
                     st.copy_to_clipboard(link_final_wa)
-                    st.success("📋 ¡Enlace de WhatsApp copiado al portapapeles! Abrí una pestaña nueva en tu navegador, pegalo con Ctrl+V (o mantener presionado en el celu) y listo.")
-                    
+                    st.success("📋 ¡Enlace de WhatsApp copiado al portapapeles! Abrí una pestaña nueva, pegalo con Ctrl+V (o mantener presionado en el celu) y listo para chatear.")
                     st.write("") 
                     
                     # DESPLIEGUE DIRECTO NATIVO DE LA IMAGEN DE CLOUDINARY
@@ -133,7 +132,7 @@ fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
 telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
-    if img_file and nombre_rescatista and lugar_hecho and phone_input := telefono_contacto:
+    if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
         if num_limpio.startswith("0"):
             num_limpio = num_limpio[1:]
@@ -166,7 +165,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
             
             fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
             
-            # Sincronización oficial del huso horario de Argentina (-3 horas)
+            # Sincronización de hora argentina oficial (-3 horas del servidor)
             hora_argentina = datetime.now() - timedelta(hours=3)
             fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
             
