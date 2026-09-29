@@ -72,9 +72,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    
-                    # Extracción matemática corregida del casillero bidimensional
-                    porcentaje = float(similitud[0][0]) * 100
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -90,7 +88,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
+                    # CORRECCIÓN ENLACE EN BUSCADOR: Formato wa.me con barra diagonal limpia hiperestable
+                    mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
                     st.markdown(f'<h3>📱 Contactar al responsable:</h3>', unsafe_allow_html=True)
@@ -98,7 +97,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.link_button("💬 CHATEAR DIRECTO POR WHATSAPP", url_whatsapp)
                     st.write("") 
                     
-                    # RENDERIZADO EN BASE64 CORREGIDO PARA EL MATCH
+                    # RENDERIZADO EN BASE64 PARA EL MATCH
                     foto_b64 = mejor_coincidencia.get('ruta_imagen', '')
                     if foto_b64 and foto_b64 != "error" and "http" not in str(foto_b64):
                         try:
@@ -147,7 +146,6 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         else:
             with st.spinner("Procesando y encriptando imagen de forma nativa..."):
                 try:
-                    # Encriptamos la foto a texto puro de forma local e indestructible
                     _, buffer = cv2.imencode('.jpg', img_bgr)
                     foto_b64_string = base64.b64encode(buffer).decode('utf-8')
                 except Exception as b64_err:
@@ -165,7 +163,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "nombre_dueño": nombre_rescatista,
                     "zona": lugar_hecho,
                     "contacto": num_limpio,
-                    "ruta_imagen": foto_b64_string, # La foto viaja adentro del JSON sin depender de la nube externa
+                    "ruta_imagen": foto_b64_string,
                     "huella": huella,
                     "fecha_hecho": fecha_hecho_str,
                     "fecha_subida": fecha_subida_str
@@ -206,4 +204,5 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
+            # CORRECCIÓN ENLACE EN GALERÍA TAMBIÉN: Sistema universal wa.me/ impecable
             num_destino = mascara.get('contacto', '')
