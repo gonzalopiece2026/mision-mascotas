@@ -1,23 +1,13 @@
 import os
 import cv2
 import json
-import time
-import asyncio
+import base64
 import urllib.parse
 from datetime import datetime, timedelta
 import numpy as np
 import streamlit as st
 import requests
-import cloudinary
-import cloudinary.uploader
 from sklearn.metrics.pairwise import cosine_similarity
-
-# --- CONFIGURACIÓN DE CLOUDINARY REAL ---
-cloudinary.config(
-    cloud_name="rur0qbqsy",
-    api_key="241877892786994",
-    api_secret="7lE9S4b4N4q-7iA_VfOOfDk4m0g"
-)
 
 # --- CONFIGURACIÓN DE LA PÁGINA WEB ---
 st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_icon="🐶", layout="centered")
@@ -25,9 +15,24 @@ st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_ico
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
-# CONFIGURACIÓN DE BASE DE DATOS ULTRA-ESTABLE EN MEMORIA VIVA
-if "base_datos_federal" not in st.session_state:
-    st.session_state["base_datos_federal"] = []
+ARCHIVO_BD = "base_datos_mascotas.json"
+
+def cargar_base_datos():
+    if os.path.exists(ARCHIVO_BD):
+        with open(ARCHIVO_BD, "r", encoding="utf-8") as f:
+            try:
+                contenido = f.read().strip()
+                if not contenido or contenido == "[]":
+                    return []
+                f.seek(0)
+                return json.load(f)
+            except:
+                return []
+    return []
+
+def guardar_base_datos(datos):
+    with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
+        json.dump(datos, f, ensure_ascii=False, indent=4)
 
 # MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ NATIVA (INFALIBLE)
 def extraer_huella_segura(img_bgr):
@@ -56,7 +61,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
         if huella_usuario is None:
             st.error("❌ No se pudo procesar la imagen de búsqueda.")
         else:
-            bd = st.session_state["base_datos_federal"]
+            bd = cargar_base_datos()
             if not bd:
                 st.warning("📭 La base de datos nacional está vacía. Registrá una mascota abajo primero.")
             else:
@@ -83,7 +88,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
+                    mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
                     st.markdown(f'<h3>📱 Contactar al responsable:</h3>', unsafe_allow_html=True)
@@ -91,11 +96,16 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.link_button("💬 CHATEAR DIRECTO POR WHATSAPP", url_whatsapp)
                     st.write("") 
                     
-                    url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
-                    if "http" in str(url_foto_match):
-                        st.image(str(url_foto_match), caption="Foto oficial de la mascota en el reporte nacional", use_container_width=True)
+                    # RENDERIZADO DEFINITIVO DE IMAGEN POR BASE64
+                    foto_b64 = mejor_coincidencia.get('ruta_imagen', '')
+                    if foto_b64 and foto_b64 != "error":
+                        try:
+                            bytes_decor = base64.b64decode(foto_b64)
+                            st.image(bytes_decor, caption="Foto oficial de la mascota en el reporte nacional", use_container_width=True)
+                        except:
+                            st.warning("📷 Formato de imagen viejo no compatible.")
                     else:
-                        st.warning("📷 La foto de este registro no está disponible en los servidores de la nube.")
+                        st.warning("📷 La foto de este registro no está disponible.")
                 else:
                     st.error("❌ No se encontraron coincidencias similares en el sistema.")
     else:
@@ -133,21 +143,17 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         if huella is None:
             st.error("❌ Ocurrió un problema al procesar la imagen.")
         else:
-            ruta_foto_cloudinary = "error"
-            with st.spinner("Subiendo imagen de forma segura a la nube de Cloudinary..."):
+            with st.spinner("Procesando y encriptando imagen de forma nativa..."):
                 try:
-                    cv2.imwrite("temp_upload.jpg", img_bgr)
-                    # CORRECCIÓN MAESTRA: Forzamos la subida síncrona obligatoria para que retenga el archivo
-                    resultado_upload = cloudinary.uploader.upload("temp_upload.jpg", resource_type="image")
-                    ruta_foto_cloudinary = resultado_upload.get("secure_url", "error")
-                    time.sleep(2) # Espera técnica para asegurar el renderizado
-                    if os.path.exists("temp_upload.jpg"):
-                        os.remove("temp_upload.jpg")
-                except Exception as upload_err:
-                    print(f"Error al subir: {upload_err}")
+                    # Transformamos el archivo subido en texto Base64 indestructible
+                    _, buffer = cv2.imencode('.jpg', img_bgr)
+                    foto_b64_string = base64.b64encode(buffer).decode('utf-8')
+                except Exception as b64_err:
+                    print(f"Error Base64: {b64_err}")
+                    foto_b64_string = "error"
             
-            if ruta_foto_cloudinary == "error" or not ruta_foto_cloudinary:
-                st.error("❌ Error de conexión con el servidor de imágenes. Intenta de nuevo.")
+            if foto_b64_string == "error":
+                st.error("❌ Error interno al procesar la vista previa. Intenta con otra imagen.")
             else:
                 fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
                 hora_argentina = datetime.now() - timedelta(hours=3)
@@ -157,15 +163,16 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "nombre_dueño": nombre_rescatista,
                     "zona": lugar_hecho,
                     "contacto": num_limpio,
-                    "ruta_imagen": str(ruta_foto_cloudinary),
+                    "ruta_imagen": foto_b64_string, # La foto viaja adentro del JSON como texto eterno
                     "huella": huella,
                     "fecha_hecho": fecha_hecho_str,
                     "fecha_subida": fecha_subida_str
                 }
                 
-                st.session_state["base_datos_federal"].append(nueva_mascota)
-                st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la nube nacional.")
-                time.sleep(1)
+                bd = cargar_base_datos()
+                bd.append(nueva_mascota)
+                guardar_base_datos(bd)
+                st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la red nacional.")
                 st.rerun()
     else:
         st.warning("⚠️ Todos los campos principales son obligatorios.")
@@ -174,18 +181,22 @@ st.divider()
 
 # --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL ---
 st.header("🖼️ Galería Nacional de Mascotas Alertas")
-bd = st.session_state["base_datos_federal"]
+bd = cargar_base_datos()
 if not bd:
     st.info("📭 No hay alertas registradas en este momento. Las nuevas aparecerán acá.")
 else:
     for mascara in reversed(bd):
         col_img, col_info = st.columns(2)
         with col_img:
-            url_galeria_img = mascara.get("ruta_imagen", "")
-            if "http" in str(url_galeria_img):
-                st.image(str(url_galeria_img), width=150)
+            foto_gal_b64 = mascara.get("ruta_imagen", "")
+            if foto_gal_b64 and foto_gal_b64 != "error" and "http" not in str(foto_gal_b64):
+                try:
+                    bytes_gal = base64.b64decode(foto_gal_b64)
+                    st.image(bytes_gal, width=150)
+                except:
+                    st.text("📷 Foto no disponible")
             else:
-                st.text("📷 Foto no disponible")
+                st.text("📷 Registro antiguo inactivo")
         with col_info:
             nombre_galeria = mascara.get('nombre_dueño', 'Anónimo')
             st.markdown(f"**👤 Responsable:** {nombre_galeria}")
@@ -195,12 +206,3 @@ else:
             
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
-            url_gal = f"https://wa.me{num_destino}?text={msg_gal}"
-            
-            st.write(f"WhatsApp: +{num_destino}")
-            st.link_button("💬 Hablar por WhatsApp", url_gal)
-        st.divider()
-
-st.divider()
-
-# --- 4️⃣ SECCIÓN DE DONACIONES ---
