@@ -40,13 +40,13 @@ st.markdown("""
         width: 100% !important;
     }
     .stTabs [data-baseweb="tab"] {
-        background-color: #ffffff;
+        background-color: #ffffff !important;
         border-radius: 15px;
-        padding: 6px 10px !important; /* Achicamos el margen interno al mínimo */
+        padding: 6px 10px !important;
         border: 1px solid #e5e7eb;
-        font-weight: bold;
-        color: #4b5563;
-        font-size: 0.78rem !important; /* Letra más chica para asegurar que entre todo */
+        font-weight: bold !important;
+        color: #1e3a8a !important; /* CORRECCIÓN: Forzamos el color azul oscuro para que se lea perfecto */
+        font-size: 0.78rem !important;
         white-space: nowrap;
     }
     .stTabs [aria-selected="true"] {
@@ -130,7 +130,7 @@ async def ejecutar_robot_global(palabra_clave):
     link_global = f"https://google.com{texto_seguro}&tbm=isch"
     contador = 0
     headers_simulados = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Introduction Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'es-ES,es;q=0.9',
         'Referer': 'https://google.com'
@@ -164,7 +164,7 @@ async def ejecutar_robot_global(palabra_clave):
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA ULTRA COMPACTA (Nombres súper cortos para que entren siempre) ---
+# --- INTERFAZ GRÁFICA ULTRA COMPACTA ---
 pestaña_buscar, pestaña_registrar, pestaña_robot = st.tabs([
     "🔎 BUSCAR", 
     "📝 ALERTA", 
