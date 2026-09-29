@@ -123,7 +123,6 @@ with pestaña_galeria:
         st.info("📭 No hay alertas registradas en este momento. ¡Las nuevas aparecerán acá!")
     else:
         for mascota in reversed(bd):
-            # CORRECCIÓN CLAVE: Agregamos el número 2 adentro para dividir correctamente en dos columnas
             col_img, col_info = st.columns(2)
             with col_img:
                 if "http" in mascota["ruta_imagen"]:
@@ -211,3 +210,5 @@ with pestaña_registrar:
                 bd = cargar_base_datos()
                 bd.append({
                     "nombre_dueño": nombre,
+                    "zona": zona,
+                    "contacto": contacto_limpio,
