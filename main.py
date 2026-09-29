@@ -15,24 +15,9 @@ st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_ico
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
-ARCHIVO_BD = "base_datos_mascotas.json"
-
-def cargar_base_datos():
-    if os.path.exists(ARCHIVO_BD):
-        with open(ARCHIVO_BD, "r", encoding="utf-8") as f:
-            try:
-                contenido = f.read().strip()
-                if not contenido or contenido == "[]":
-                    return []
-                f.seek(0)
-                return json.load(f)
-            except:
-                return []
-    return []
-
-def guardar_base_datos(datos):
-    with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
-        json.dump(datos, f, ensure_ascii=False, indent=4)
+# INICIALIZACIÓN DE LA BASE DE DATOS GLOBAL EN MEMORIA VIVA (INMUNE A TRABAS DE SERVIDORES)
+if "base_datos_global_viva" not in st.session_state:
+    st.session_state["base_datos_global_viva"] = []
 
 # MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ NATIVA (INFALIBLE)
 def extraer_huella_segura(img_bgr):
@@ -61,7 +46,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
         if huella_usuario is None:
             st.error("❌ No se pudo procesar la imagen de búsqueda.")
         else:
-            bd = cargar_base_datos()
+            bd = st.session_state["base_datos_global_viva"]
             if not bd:
                 st.warning("📭 La base de datos nacional está vacía. Registrá una mascota abajo primero.")
             else:
@@ -73,8 +58,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # CORRECCIÓN DEFINITIVA: Rompemos las cajas de corchetes con la posición [0][0] para evitar el TypeError
-                    porcentaje = float(similitud[0][0]) * 100
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -115,7 +99,7 @@ st.divider()
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
-# CASILLEROS COMUNITARIOS COMPLETOS FIJOS EN PANTALLA
+# CASILLEROS COMUNITARIOS COMPLETOS FIJOS EN MEMORIA VIVA
 tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
 img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
 nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
@@ -172,28 +156,30 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "fecha_subida": str(fecha_subida_str)
                 }
                 
-                bd = cargar_base_datos()
-                bd.append(nueva_mascota)
-                guardar_base_datos(bd)
-                st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la red nacional.")
+                # INYECCIÓN DIRECTA EN LA MEMORIA VIVA DE INTERNET
+                st.session_state["base_datos_global_viva"].append(nueva_mascota)
+                st.success("✅ ¡Éxito! Mascota registrada cronológicamente en la red en vivo.")
                 st.rerun()
     else:
         st.warning("⚠️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL (FORMATO PIZARRA VERTICAL TIPO TELEVISIÓN) ---
+# --- 3️⃣ SECCIÓN DE GALERÍA NACIONAL EN TIEMPO REAL FIJA (FORMATO TELEVISIÓN) ---
 st.header("🖼️ Galería Nacional de Mascotas Alertas")
-bd = cargar_base_datos()
+bd = st.session_state["base_datos_global_viva"]
 if not bd:
-    st.info("📭 No hay alertas registradas en este momento. Las nuevas aparecerán acá.")
+    st.info("📭 No hay alertas registradas en este momento en vivo. Las nuevas aparecerán acá de inmediato.")
 else:
     for mascara in reversed(bd):
-        # Cada registro se clava en un contenedor gris fijo indestructible
+        # Recuadro gris fijo de noticiero indestructible
         with st.container(border=True):
             t_alerta = mascara.get('tipo_alerta', 'Perdido')
             cartel_galeria = "🔴 MASCOTA PERDIDA" if t_alerta == "Perdido" else "🟢 MASCOTA ENCONTRADA"
             st.markdown(f"## {cartel_galeria}")
             
-            # Imprimimos toda la ficha técnica fija de forma obligatoria
+            # Imprimimos de forma fija y obligatoria toda la ficha técnica arriba de la foto
             st.markdown(f"**🐾 Nombre de la mascota:** {mascara.get('nombre_perro', 'No especificado')}")
+            st.markdown(f"**🐕 Raza / Color:** {mascara.get('raza', 'No específica')} | {mascara.get('color', 'No especificado')}")
+            st.markdown(f"**📝 Señas Particulares:** {mascara.get('detalles', 'Sin detalles')}")
+            st.markdown(f"**📍 Ocurrió en:** {mascara.get('zona', 'No especificado')}")
