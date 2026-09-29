@@ -91,10 +91,10 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                     st.info(f"👤 Responsable: {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 Lugar del hecho: {mejor_coincidencia.get('zona', 'No especificada')} \n📅 Fecha: {mejor_coincidencia.get('fecha_hecho', 'No especificada')}")
                     
-                    # CORRECCIÓN ENLACE: Se agregó la barra diagonal "/" que faltaba para armar bien wa.me/
+                    # LINK MEJORADO: Usamos el sistema oficial ://whatsapp.com para saltar el bloqueo de historial de Chrome
                     numero_match = mejor_coincidencia.get('contacto', '')
                     mensaje_whatsapp = urllib.parse.quote("¡Hola! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
-                    url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
+                    url_whatsapp = f"https://://whatsapp.com/send?phone={numero_match}&text={mensaje_whatsapp}"
                     
                     st.link_button("💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO", url_whatsapp)
                     st.write("") 
@@ -139,7 +139,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         huella = extraer_huella_segura(img_bgr)
         
         if huella is None:
-            st.error("❌ Ocurrió un problema al procesar la imagen.")
+            st.error("❌ Ocurrió un problem al procesar la imagen.")
         else:
             with st.spinner("Subiendo imagen de forma segura a la nube de Cloudinary..."):
                 try:
@@ -196,10 +196,10 @@ else:
             st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
             st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
             
-            # CORRECCIÓN ENLACE GALERÍA: También agregamos la barra diagonal aquí
+            # LINK MEJORADO GALERÍA: También aplicamos ://whatsapp.com aquí
             num_destino = mascara.get('contacto', '')
             msg_gal = urllib.parse.quote("¡Hola! Vi la publicación de la mascota en Misión Mascotas. ¿Sigue activa la búsqueda?")
-            url_gal = f"https://wa.me{num_destino}?text={msg_gal}"
+            url_gal = f"https://://whatsapp.com/send?phone={num_destino}&text={msg_gal}"
             st.link_button("💬 Hablar por WhatsApp", url_gal)
         st.divider()
 
