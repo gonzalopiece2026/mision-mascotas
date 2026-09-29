@@ -79,10 +79,10 @@ st.markdown("""
         background-color: #128c7e;
     }
     </style>
-""", unsafe_allowed_html=True)
+""", unsafe_allow_html=True)
 
-st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allowed_html=True)
-st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con Inteligencia Artificial.</p>", unsafe_allowed_html=True)
+st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por recognition visual con Inteligencia Artificial.</p>", unsafe_allow_html=True)
 
 # Cargamos la IA y la base de datos
 @st.cache_resource
@@ -203,7 +203,6 @@ with pestaña_registrar:
     
     if st.button("Guardar en la Red Nacional"):
         if img_file and nombre and zona and contacto:
-            # Limpiamos el número de teléfono eliminando espacios o guiones
             contacto_limpio = "".join(filter(str.isdigit, contacto))
             
             file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
@@ -252,3 +251,5 @@ with pestaña_buscar:
                     for mascota in bd:
                         huella_db = np.array(mascota["huella"]).reshape(1, -1)
                         vector_u = np.array(huella_usuario).reshape(1, -1)
+                        similitud = cosine_similarity(vector_u, huella_db)
+                        porcentaje = float(similitud) * 100
