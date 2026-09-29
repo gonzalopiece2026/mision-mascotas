@@ -73,8 +73,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # CORRECCIÓN DE LA LÍNEA 77: Extracción indexada directa para evitar el TypeError de arrays bidimensionales
-                    porcentaje = float(similitud[0][0]) * 100
+                    # Extracción lineal aplanada de NumPy nativa
+                    valor_plano = float(np.ravel(similitud))
+                    porcentaje = valor_plano * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -201,4 +202,5 @@ else:
             else:
                 st.text("📷 Registro antiguo no disponible")
         with col_info:
-            # FIX DE EXPLICACIÓN EN GALERÍA: Mapeo mapeado de forma explícita a las variables guardadas en español
+            t_alerta = mascara.get('tipo_alerta', 'Perdido')
+            cartel_galeria = "🔴 PERDIDO" if t_alerta == "Perdido" else "🟢 ENCONTRADO"
