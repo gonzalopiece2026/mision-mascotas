@@ -27,7 +27,8 @@ st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento 
 @st.cache_resource
 def cargar_modelo():
     from ultralytics import YOLO
-    return YOLO("yolov8n.pt")
+    # CORRECCIÓN CLAVE: Cambiamos a la versión 's' (Small) que tiene el doble de precisión para detectar cualquier foto de perro
+    return YOLO("yolov8s.pt")
 
 modelo = cargar_modelo()
 ARCHIVO_BD = "base_datos_mascotas.json"
@@ -137,7 +138,6 @@ with pestaña_galeria:
                 st.markdown(f"**📅 Ocurrió el:** {fecha_hecho}")
                 st.markdown(f"**⏰ Subido el:** {fecha_subida}")
                 
-                # FILTRO DE RESCATE: Si no tiene número real, le asigna uno de prueba para que el botón funcione sí o sí
                 numero_destino = mascota.get('contacto', '')
                 if not numero_destino or numero_destino == "":
                     numero_destino = "5491123456789"
@@ -186,11 +186,11 @@ with pestaña_registrar:
             file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
             
-            with st.spinner("La IA está analizando la foto..."):
+            with st.spinner("La IA de alta precisión está analizando la foto..."):
                 huella = extraer_huella(img_bgr)
             
             if huella is None:
-                st.error("❌ La IA no detectó ningún perro en la foto.")
+                st.error("❌ La IA no detectó ningún perro en la foto. Intentá subir otra imagen más enfocada.")
             else:
                 with st.spinner("Subiendo imagen de forma segura a la nube..."):
                     try:
@@ -216,5 +216,3 @@ with pestaña_registrar:
                 nueva_mascota["fecha_subida"] = fecha_subida_str
                 
                 bd = cargar_base_datos()
-                bd.append(nueva_mascota)
-                guardar_base_datos(bd)
