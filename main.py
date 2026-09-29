@@ -37,11 +37,11 @@ st.markdown("""
         gap: 8px;
         justify-content: center;
         display: flex;
-        flex-wrap: wrap; /* Permite que bajen de renglón en celulares en vez de ocultarse */
+        flex-wrap: wrap;
     }
     .stTabs [data-baseweb="tab"] {
         background-color: #ffffff;
-        border-radius: 20px; /* Bordes más redondeados y pintorescos */
+        border-radius: 20px;
         padding: 8px 16px;
         border: 1px solid #e5e7eb;
         font-weight: 600;
@@ -86,8 +86,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA.</p>", unsafe_allow_html=True)
+st.markdown("<h1>🐶 Misión Mascotas</h1>", unsafe_allowed_html=True)
+st.markdown("<p class='subtitulo'>Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA.</p>", unsafe_allowed_html=True)
 
 # Cargamos la IA y la base de datos
 @st.cache_resource
@@ -158,7 +158,7 @@ async def ejecutar_robot_global(palabra_clave):
                 try:
                     contador += 1
                     nombre_archivo = f"robot_global_{contador}.jpg"
-                    ruta_completa = os.path.join(CARPETA_IMAGENES, name_archivo)
+                    ruta_completa = os.path.join(CARPETA_IMAGENES, nombre_archivo)
                     
                     img_data = session.get(src, headers=headers_simulados, timeout=5).content
                     with open(ruta_completa, "wb") as f:
@@ -254,3 +254,4 @@ with pestaña_buscar:
                     mayor_porcentaje = 0.0
                     
                     for mascota in bd:
+                        huella_db = np.array(mascota["huella"]).reshape(1, -1)
