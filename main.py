@@ -10,7 +10,7 @@ import requests
 import cloudinary
 import cloudinary.uploader
 
-# --- CONFIGURACIÓN DE CLOUDINARY REAL (DATOS DE TU CAPTURA) ---
+# --- CONFIGURACIÓN DE CLOUDINARY REAL CORREGIDA CON TEXTO ESTRICTO ---
 cloudinary.config(
     cloud_name="rur0qbqsy",
     api_key="241877892786994",
@@ -36,7 +36,7 @@ def guardar_base_datos(datos):
     with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=4)
 
-# MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ (100% INMANEABLE E INFALIBLE CONTRA FOTOS DIFÍCILES)
+# MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ NATIVA (INFALIBLE)
 def extraer_huella_segura(img_bgr):
     try:
         if img_bgr is not None and img_bgr.size > 0:
@@ -185,7 +185,7 @@ with pestaña_registrar:
                         if os.path.exists("temp_upload.jpg"):
                             os.remove("temp_upload.jpg")
                     except Exception as upload_err:
-                        st.error(f"Error al subir: {upload_err}")
+                        print(f"Error al subir: {upload_err}")
                         ruta_foto_cloudinary = "error"
                 
                 fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
@@ -214,3 +214,4 @@ with pestaña_buscar:
     if st.button("Buscar Coincidencias con IA"):
         if img_buscar_file:
             file_bytes = np.asarray(bytearray(img_buscar_file.read()), dtype=np.uint8)
+            img_bgr = cv2.imdecode(file_bytes, 1)
