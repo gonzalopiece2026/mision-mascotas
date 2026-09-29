@@ -211,8 +211,9 @@ with pestaña_buscar:
     st.write("Subí la foto de un perro para contrastarlo con la base de datos.")
     img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
     
-    # CORRECCIÓN MAESTRA: Si hay un archivo cargado, ejecuta la búsqueda AUTOMÁTICAMENTE sin depender de botones
-    if img_buscar_file:
-        file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
-        img_bgr = cv2.imdecode(file_bytes, 1)
-        
+    # VOLVEMOS AL BOTÓN ESTABLE CLÁSICO SEGURO DE STREAMLIT
+    if st.button("Buscar Coincidencias con IA"):
+        if img_buscar_file:
+            file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
+            img_bgr = cv2.imdecode(file_bytes, 1)
+            
