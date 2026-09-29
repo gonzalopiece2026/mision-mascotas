@@ -3,6 +3,7 @@ import cv2
 import json
 import asyncio
 import urllib.parse
+from datetime import datetime
 import numpy as np
 import streamlit as st
 import requests
@@ -103,7 +104,7 @@ async def ejecutar_robot_global(palabra_clave):
     except:
         return -1
 
-# --- INTERFAZ GRÁFICA CON NUEVA PESTAÑA DE GALERÍA ---
+# --- INTERFAZ GRÁFICA ---
 pestaña_buscar, pestaña_registrar, pestaña_galeria, pestaña_robot, pestaña_donar = st.tabs([
     "🔎 BUSCAR", 
     "📝 ALERTA", 
@@ -114,7 +115,7 @@ pestaña_buscar, pestaña_registrar, pestaña_galeria, pestaña_robot, pestaña_
 
 with pestaña_galeria:
     st.subheader("🖼️ Galería Nacional de Mascotas Alertas")
-    st.write("Acá aparecen las fotos de los perritos perdidos y encontrados cargados en tiempo real por los vecinos de todo el país.")
+    st.write("Acá aparecen las fotos de los perritos perdidos y encontrados ordenados cronológicamente.")
     st.divider()
     
     bd = cargar_base_datos()
@@ -122,7 +123,7 @@ with pestaña_galeria:
         st.info("📭 No hay alertas registradas en este momento. ¡Las nuevas aparecerán acá!")
     else:
         for mascota in reversed(bd):
-            col_img, col_info = st.columns([1, 2])
+            col_img, col_info = st.columns()
             with col_img:
                 if "http" in mascota["ruta_imagen"]:
                     st.image(mascota["ruta_imagen"], width=150)
@@ -133,9 +134,14 @@ with pestaña_galeria:
                         st.text("📷 Foto no disponible")
             with col_info:
                 st.markdown(f"**👤 Responsable:** {mascota['nombre_dueño']}")
-                st.markdown(f"**📍 Ubicación:** {mascota['zona']}")
+                st.markdown(f"**📍 Lugar del hecho:** {mascota['zona']}")
+                # Si el registro viejo no tiene fecha, le ponemos una por defecto para que no falle
+                fecha_hecho = mascota.get("fecha_hecho", "No especificada")
+                fecha_subida = mascota.get("fecha_subida", "No especificada")
+                st.markdown(f"**📅 Ocurrió el:** {fecha_hecho}")
+                st.markdown(f"**⏰ Subido a la app el:** {fecha_subida}")
                 
-                msg_galeria = urllib.parse.quote(f"¡Hola {mascota['nombre_dueño']}! Vi la foto de la mascota que publicaste en la sección de alertas de Misión Mascotas. ¿Sigue estando activa la búsqueda?")
+                msg_galeria = urllib.parse.quote(f"¡Hola {mascota['nombre_dueño']}! Vi la foto de la mascota que publicaste el {fecha_hecho} en la zona de {mascota['zona']} a través de Misión Mascotas. ¿Sigue activa la búsqueda?")
                 url_galeria = f"https://wa.me{mascota['contacto']}?text={msg_galeria}"
                 st.link_button(f"💬 Hablar con {mascota['nombre_dueño']}", url_galeria)
             st.divider()
@@ -168,12 +174,19 @@ with pestaña_robot:
 
 with pestaña_registrar:
     st.subheader("Registrar Alerta de Mascota")
-    st.write("Subí la foto y los datos del perrito para que el buscador lo indexe.")
+    st.write("Subí la foto y detallá cuándo y dónde se vio al perrito por última vez.")
     img_file = st.file_uploader("Subí la foto del perro", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
     nombre = st.text_input("Nombre del Dueño / Rescatista")
-    zona = st.text_input("Provincia / Localidad / Barrio (Ej: Moreno, Buenos Aires)")
+    
+    # Campo adaptado para registrar la ubicación exacta
+    zona = st.text_input("¿Dónde se extravió / encontró? (Ej: Barrio Satélite, Moreno, Buenos Aires)")
+    
+    # Selector de calendario nativo para la fecha en que ocurrió el hecho
+    fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
+    
     contacto = st.text_input("Teléfono de Contacto (Con código de área, ej: 1123456789)")
     link = st.text_input("Link de la Publicación (Opcional)")
+    
     if st.button("Guardar en la Red Nacional"):
         if img_file and nombre and zona and contacto:
             contacto_limpio = "".join(filter(str.isdigit, contacto))
@@ -198,20 +211,4 @@ with pestaña_registrar:
                         ruta_foto_cloudinary = f"fotos_registradas/perro_{nombre}_{contacto_limpio}.jpg"
                         cv2.imwrite(ruta_foto_cloudinary, img_bgr)
                 
-                bd = cargar_base_datos()
-                bd.append({
-                    "nombre_dueño": nombre,
-                    "zona": zona,
-                    "contacto": contacto_limpio,
-                    "link_redes": link if link else "No especificado",
-                    "ruta_imagen": ruta_foto_cloudinary,
-                    "huella": huella
-                })
-                guardar_base_datos(bd)
-                st.success(f"✅ ¡Éxito! Mascota registrada de forma permanente en la nube nacional.")
-        else:
-            st.warning("⚠️ Todos los campos principales son obligatorios.")
-
-with pestaña_buscar:
-    st.subheader("Buscar Coincidencias Visuales")
-    st.write("Subí la foto de un perro para contrastarlo con la base de datos.")
+                # Formateamos las fechas de manera prolija para que se lean lindo en Argentina
