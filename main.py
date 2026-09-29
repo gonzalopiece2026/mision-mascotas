@@ -110,7 +110,6 @@ with pestaña_donar:
     st.divider()
     
     st.markdown("### 💳 Transferencia Directa (Monto Libre)")
-    # Cuando quieras podés cambiar estos dos renglones por tu Alias y CBU reales de tu banco
     st.text("Alias: TU.ALIAS.REAL.AQUÍ")
     st.text("CBU / CVU: 0000000000000000000000")
     st.text("Titular: Gonzalo")
@@ -120,8 +119,6 @@ with pestaña_donar:
     st.markdown("### 🚀 Mercado Pago (Monto Libre)")
     st.write("Hacé clic en el botón de abajo para colaborar con el monto que vos elijas de forma segura:")
     st.write("") 
-    
-    # ¡BOTÓN EXCLUSIVO DE MONTO LIBRE CON TU LINK REAL!
     st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
 
 with pestaña_robot:
@@ -210,4 +207,4 @@ with pestaña_buscar:
                         
                         st.info(f"👤 Responsable: {mejor_coincidencia['nombre_dueño']} \n📍 Ubicación: {mejor_coincidencia['zona']} \n🔗 Link de origen: {mejor_coincidencia['link_redes']}")
                         
-                        mensaje_whatsapp = urllib.parse.quote(
+                        mensaje_whatsapp = urllib.parse.quote(f"¡Hola {mejor_coincidencia['nombre_dueño']}! Vi tu alerta en Misión Mascotas. La IA encontró una coincidencia muy alta con una foto. ¿Podemos hablar para verificar si es tu perrito?")
