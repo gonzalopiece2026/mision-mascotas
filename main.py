@@ -202,4 +202,5 @@ else:
             else:
                 st.text("📷 Registro antiguo no disponible")
         with col_info:
-            # CORRECCIÓN EN GALERÍA: Se cambiaron los nombres en inglés por las variables reales guardadas en español
+            t_alerta = mascara.get('tipo_alerta', 'Perdido')
+            cartel_galeria = "🔴 PERDIDO" if t_alerta == "Perdido" else "🟢 ENCONTRADO"
