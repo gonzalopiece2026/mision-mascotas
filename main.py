@@ -24,7 +24,6 @@ st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_ico
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
-# CORRECCIÓN MAESTRA: Cambiado 'not_in' por la sintaxis reglamentaria 'not in' separada para evitar SyntaxError
 if "bd_mascotas_memoria" not in st.session_state:
     st.session_state["bd_mascotas_memoria"] = []
 
@@ -66,7 +65,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(similitud) * 100
+                    
+                    # CORRECCIÓN MAESTRA DEFINITIVA: Extraemos la posición [0][0] para sacar el número real de los corchetes dobles
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
