@@ -81,7 +81,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(similitud) * 100
+                    
+                    # CORRECCIÓN EXTRA: Extracción segura del valor plano de la matriz de Scikit-Learn
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -91,14 +93,15 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
                     st.info(f"👤 Responsable: {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 Lugar del hecho: {mejor_coincidencia.get('zona', 'No especificada')} \n📅 Fecha: {mejor_coincidencia.get('fecha_hecho', 'No especificada')}")
                     
+                    # Generación de enlace con el prefijo internacional de Argentina blindado
                     numero_match = mejor_coincidencia.get('contacto', '')
-                    mensaje_whatsapp = urllib.parse.quote("¡Hola! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito.")
+                    mensaje_whatsapp = urllib.parse.quote("¡Hola! Vi tu alerta en Misión Mascotas. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
                     st.link_button("💬 ENVIAR WHATSAPP DIRECTO AL DUEÑO", url_whatsapp)
                     st.write("") 
                     
-                    # Despliegue nítido de la foto guardada en Cloudinary bajo el match
+                    # Despliegue nítido de la foto guardada en Cloudinary
                     url_foto_match = mejor_coincidencia.get('ruta_imagen', '')
                     if "http" in url_foto_match:
                         st.image(url_foto_match, caption="Foto de la mascota guardada en el reporte nacional", use_container_width=True)
@@ -122,7 +125,18 @@ telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, 
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
-        contacto_limpio = "".join(filter(str.isdigit, telefono_contacto))
+        # Formateador Inteligente de WhatsApp Argentina: Limpia el texto y fuerza el prefijo 549 reglamentario
+        num_limpio = "".join(filter(str.isdigit, telefono_contacto))
+        if num_limpio.startswith("0"):
+            num_limpio = num_limpio[1:]
+        if num_limpio.startswith("15"):
+            num_limpio = num_limpio[2:]
+        if not num_limpio.startswith("54"):
+            if num_limpio.startswith("9"):
+                num_limpio = "54" + num_limpio
+            else:
+                num_limpio = "549" + num_limpio
+                
         file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
@@ -144,14 +158,14 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
             
             fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
             
-            # CORRECCIÓN DE HORA: Restamos 3 horas al reloj del servidor para fijar el horario oficial de Argentina
+            # Sincronización oficial de 3 horas con el horario de Argentina
             hora_argentina = datetime.now() - timedelta(hours=3)
             fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
             
             nueva_mascota = {
                 "nombre_dueño": nombre_rescatista,
                 "zona": lugar_hecho,
-                "contacto": contacto_limpio,
+                "contacto": num_limpio,
                 "ruta_imagen": ruta_foto_cloudinary,
                 "huella": huella,
                 "fecha_hecho": fecha_hecho_str,
