@@ -73,7 +73,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # CORRECCIÓN DE FIJACIÓN INTEGRAL: Extraemos la posición exacta rompiendo las dos cajas de corchetes
+                    # Extracción matemática nativa de la matriz de scikit-learn
                     porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
@@ -90,7 +90,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # CORRECCIÓN ENLACE EN BUSCADOR: Formato nativo abre la app de WhatsApp directo en celulares sin rebotes
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
@@ -127,16 +126,23 @@ telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, 
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
+        # FORMATEADOR QUIRÚRGICO DE WHATSAPP: Evita la duplicación del 11 o el 15 en Argentina
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
+        
+        # Le sacamos el 0 inicial si lo pusieron
         if num_limpio.startswith("0"):
             num_limpio = num_limpio[1:]
+        # Le sacamos el 15 si venía separado
         if num_limpio.startswith("15"):
             num_limpio = num_limpio[2:]
-        if not num_limpio.startswith("54"):
+        # Si ya arranca con 54, nos aseguramos de que no tenga un 15 pegado adentro
+        if num_limpio.startswith("54"):
+            num_limpio = num_limpio[2:]
             if num_limpio.startswith("9"):
-                num_limpio = "54" + num_limpio
-            else:
-                num_limpio = "549" + num_limpio
+                num_limpio = num_limpio[1:]
+                
+        # Ahora que el número está puro (ej: 1162330944), le inyectamos el prefijo reglamentario internacional limpio
+        num_final_ar = "549" + num_limpio
                 
         file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
@@ -164,7 +170,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 nueva_mascota = {
                     "nombre_dueño": nombre_rescatista,
                     "zona": lugar_hecho,
-                    "contacto": num_limpio,
+                    "contacto": num_final_ar,
                     "ruta_imagen": foto_b64_string,
                     "huella": huella,
                     "fecha_hecho": fecha_hecho_str,
@@ -202,7 +208,3 @@ else:
         with col_info:
             nombre_galeria = mascara.get('nombre_dueño', 'Anónimo')
             st.markdown(f"**👤 Responsable:** {nombre_galeria}")
-            st.markdown(f"**📍 Lugar del hecho:** {mascara.get('zona', 'No especificado')}")
-            st.markdown(f"**📅 Ocurrió el:** {mascara.get('fecha_hecho', 'No especificado')}")
-            st.markdown(f"**⏰ Subido el:** {mascara.get('fecha_subida', 'No especificado')}")
-            
