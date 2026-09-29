@@ -72,7 +72,10 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(similitud) * 100
+                    
+                    # BLINDAJE MATEMÁTICO CONTRA EL TYPEERROR: Convertimos a un escalar plano usando ravelo de numpy
+                    valor_plano = float(np.ravel(similitud)[0])
+                    porcentaje = valor_plano * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -88,7 +91,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     
                     st.info(f"👤 Responsable: {responsable_match} \n📍 Lugar del hecho: {zona_match} \n📅 Fecha del suceso: {fecha_hecho_match}")
                     
-                    # CORRECCIÓN ENLACE DE WHATSAPP: Agregada la barra diagonal "/" obligatoria para que Chrome no tire error
+                    # ENLACE DE WHATSAPP BLINDADO CON BARRA DIAGONAL
                     mensaje_whatsapp = urllib.parse.quote(f"¡Hola {responsable_match}! Vi tu alerta en Misión Mascotas publicada el {fecha_hecho_match} en {zona_match}. Encontré una coincidencia visual muy alta con tu perrito. ¿Podemos hablar?")
                     url_whatsapp = f"https://wa.me{numero_match}?text={mensaje_whatsapp}"
                     
@@ -125,7 +128,6 @@ telefono_contacto = st.text_input("Teléfono de Contacto (Con código de área, 
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
-        # FORMATEADOR QUIRÚRGICO DE WHATSAPP: Evita la duplicación en Argentina
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
         
         if num_limpio.startswith("0"):
@@ -137,7 +139,6 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
             if num_limpio.startswith("9"):
                 num_limpio = num_limpio[1:]
                 
-        # Estructura limpia reglamentaria
         num_final_ar = "549" + num_limpio
                 
         file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
