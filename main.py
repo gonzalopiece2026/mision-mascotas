@@ -73,8 +73,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # EXTRACTOR MATHEMATICO FIJO: Extrae el valor escalar puro inmune a errores de array
-                    porcentaje = float(similitud) * 100
+                    # BLINDAJE MATEMÁTICO CONTRA EL TYPEERROR: Extraemos la posición exacta rompiendo los corchetes
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
                         mayor_porcentaje = porcentaje
@@ -87,7 +87,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     cartel_tipo = "🔴 ALERTA: PERDIDO" if tipo_match == "Perdido" else "🟢 ALERTA: ENCONTRADO"
                     
                     st.markdown(f"### {cartel_tipo}")
-                    st.info(f"👤 **Responsable:** {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {mejor_coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {mejor_coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {mejor_coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {mejor_coincidencia.get('raza', 'No especificada')} | {mejor_coincidencia.get('color', 'No especificado')} \n📝 **Detalles particulares:** {mejor_coincidencia.get('detalles', 'Sin detalles adicionales')}")
+                    st.info(f"👤 **Responsable:** {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {mejor_coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {mejor_coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {mejor_coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {mejor_coincidencia.get('raza', 'No específica')} | {mejor_coincidencia.get('color', 'No especificado')} \n📝 **Detalles particulares:** {mejor_coincidencia.get('detalles', 'Sin detalles adicionales')}")
                     
                     # CONTACTO MANUAL INDESTRUCTIBLE
                     numero_match = mejor_coincidencia.get('contacto', '')
@@ -115,7 +115,7 @@ st.divider()
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
-# CASILLEROS COMUNITARIOS COMPLETOS FIJOS EN MULTI-COLUMNA NATIVA
+# CASILLEROS COMUNITARIOS COMPLETOS FIJOS EN LA PANTALLA PRINCIPAL
 tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
 img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
 nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
