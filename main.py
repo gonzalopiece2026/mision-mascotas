@@ -136,7 +136,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
+        file_bytes = np.asarray(bytearray(img_file.read()), np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
@@ -188,4 +188,4 @@ st.divider()
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
-# Se fuerza la creación de las variables de baja con una clave estática nativa única para que queden visibles sí o sí
+# Se inyecta el casillero purificado libre de la palabra globals() rota para forzar su aparición en internet
