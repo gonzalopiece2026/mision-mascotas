@@ -73,7 +73,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # CORRECCIÓN MAESTRA ABSOLUTA: Agregamos [0][0] para extraer el valor flotante puro de los corchetes
+                    # EXTRACTOR MATEMÁTICO FIJO: Rompe las cajas dobles de corchetes nativas de scikit-learn
                     porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje > mayor_porcentaje:
@@ -158,9 +158,9 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 
                 nueva_mascota = {
                     "tipo_alerta": str(tipo_alerta),
-                    "nombre_perro": str(nombre_perro) if nombre_perro else "No especificado",
+                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
                     "raza": str(raza_perro) if raza_perro else "No específica",
-                    "color": str(color_perro) if color_perro else "No Hospital",
+                    "color": str(color_perro) if color_perro else "No especificado",
                     "detalles": str(detalles_perro) if detalles_perro else "Sin detalles",
                     "nombre_dueño": str(nombre_rescatista),
                     "zona": str(lugar_hecho),
@@ -181,7 +181,21 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE DONACIONES ---
-st.header("💝 Apoyá a Misión Mascotas")
-st.write("Tu donación nos ayuda a mantener los servidores online las 24 horas.")
-st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
+# --- 3️⃣ NUEVA SECCIÓN DE SEGURIDAD COMUNIDAD: DAR DE BAJA CASOS EXITOSOS ---
+st.header("✨ Misión Cumplida: Dar de Baja Alerta")
+st.write("Si ya encontraste a tu perro o apareció el dueño, ingresá los datos de validación para borrar el reporte de la nube.")
+
+col_baja_1, col_baja_2 = st.columns(2)
+with col_baja_1:
+    baja_nombre_perro = st.text_input("Nombre exacto de la mascota", key="baja_nom")
+with col_baja_2:
+    baja_telefono = st.text_input("Teléfono celular de registro (Ej: 1162330944)", key="baja_tel")
+
+if st.button("Desactivar Alerta Permanentemente", key="btn_baja_sistema"):
+    if baja_nombre_perro and baja_telefono:
+        tel_baja_limpio = "".join(filter(str.isdigit, baja_telefono))
+        bd_actual = cargar_base_datos()
+        
+        encontrado_bd = False
+        nueva_bd_filtrada = []
+        
