@@ -191,5 +191,5 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                # SINTAXIS INDESTRUCTIBLE CORREGIDA: Se cerró el diccionario de forma perfecta con la llave "}"
+                # CORRECCIÓN DE SINTAXIS INDESTRUCTIBLE: El diccionario se cierra perfectamente en armonía limpia
                 nueva_mascota = {
