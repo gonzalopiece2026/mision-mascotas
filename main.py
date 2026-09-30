@@ -62,17 +62,19 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
             st.error("❌ No se pudo procesar la imagen de búsqueda.")
         else:
             bd = cargar_base_datos()
-            if not bd:
-                st.warning("📭 La base de datos nacional está vacía. Registrá una mascota abajo primero.")
+            # ESCUDO DE SEGURIDAD ABSOLUTO: Si la base de datos está vacía, frenamos en seco antes de ejecutar la fórmula matemática
+            if not bd or len(bd) == 0:
+                st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
             else:
                 coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
                 
-                # Recorremos toda la red y guardamos todos los que se parezcan
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(np.ravel(similitud)) * 100
+                    
+                    # EXTRACTOR INDEXADO PLANO SEGURO: Rompe las dos cajas de corchetes nativas de scikit-learn
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     # Si supera el umbral del 65%, entra al ranking de sospechosos
                     if porcentaje >= 65:
@@ -80,7 +82,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                         mascota_con_score["porcentaje_match"] = porcentaje
                         coincidencias_encontradas.append(mascota_con_score)
                 
-                # Ordenamos el ranking en vivo de mayor a menor parecido
                 coincidencias_encontradas = sorted(coincidencias_encontradas, key=lambda x: x["porcentaje_match"], reverse=True)
                 
                 if not coincidencias_encontradas:
@@ -189,5 +190,3 @@ st.divider()
 
 # --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y COMPLETAMENTE FIJA FUERA DE TODO (NUNCA SE BORRA) ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
-st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
-
