@@ -15,9 +15,24 @@ st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_ico
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
-# INICIALIZACIÓN DE LA BASE DE DATOS GLOBAL EN MEMORIA VIVA (INMUNE A PERMISOS DE LINUX)
-if "red_nacional_mascotas_viva" not in st.session_state:
-    st.session_state["red_nacional_mascotas_viva"] = []
+ARCHIVO_BD = "base_datos_mascotas.json"
+
+def cargar_base_datos():
+    if os.path.exists(ARCHIVO_BD):
+        with open(ARCHIVO_BD, "r", encoding="utf-8") as f:
+            try:
+                contenido = f.read().strip()
+                if not contenido or contenido == "[]":
+                    return []
+                f.seek(0)
+                return json.load(f)
+            except:
+                return []
+    return []
+
+def guardar_base_datos(datos):
+    with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
+        json.dump(datos, f, ensure_ascii=False, indent=4)
 
 # MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ NATIVA (INFALIBLE)
 def extraer_huella_segura(img_bgr):
@@ -32,7 +47,7 @@ def extraer_huella_segura(img_bgr):
 
 # --- 1️⃣ SECCIÓN DE BÚSQUEDA INTELIGENTE ---
 st.header("🔎 Buscar Coincidencias Visuales")
-st.write("Subí la foto de un perrito para contrastarlo de forma instantánea con toda la red en vivo.")
+st.write("Subí la foto de un perro para contrastarlo de forma instantánea con toda la red nacional.")
 img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
 
 if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
@@ -46,9 +61,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
         if huella_usuario is None:
             st.error("❌ No se pudo procesar la imagen de búsqueda.")
         else:
-            # Leemos la base de datos de la memoria viva del servidor de internet
-            bd = st.session_state["red_nacional_mascotas_viva"]
-            
+            bd = cargar_base_datos()
             if not bd or len(bd) == 0:
                 st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
             else:
@@ -70,7 +83,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 if not coincidencias_encontradas:
                     st.error("❌ No se encontraron coincidencias similares en el sistema.")
                 else:
-                    st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias en la red en tiempo real!")
+                    st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias en la red nacional!")
                     
                     for idx, coincidencia in enumerate(coincidencias_encontradas):
                         porcentaje_actual = coincidencia["porcentaje_match"]
@@ -97,20 +110,21 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                                     st.text("📷 Foto no compatible")
                             st.write("")
     else:
-        st.warning("⚠️ Primero tenés que subir una foto en el recuadro de arriba para poder buscar.")
+        st.warning("⚠️ Primero tenés que subir una foto en el recuadro of arriba para poder buscar.")
 
 st.divider()
 
-# --- 2️⃣ SECCIÓN DE BAJA UNIVERSAL FIJA UBICADA EN EL CENTRO INDESTRUCTIBLE ---
+# --- 2️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE UBICADA ESTRATÉGICAMENTE EN EL CENTRO ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
-baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026")
+# Llave de aislamiento total para que no se choque con el formulario de abajo
+baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_exclusivo")
 
-if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_universal_moreno_ok"):
+if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_universal_moreno_ok_final"):
     if baja_telefono_fijo_ok:
         tel_baja_limpio = "".join(filter(str.isdigit, baja_telefono_fijo_ok))
-        bd_actual = st.session_state["red_nacional_mascotas_viva"]
+        bd_actual = cargar_base_datos()
         
         cantidad_removidos = 0
         nueva_bd_filtrada = []
@@ -122,8 +136,8 @@ if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_uni
                 nueva_bd_filtrada.append(m)
                 
         if cantidad_removidos > 0:
-            st.session_state["red_nacional_mascotas_viva"] = nueva_bd_filtrada
-            st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publicación(es) de la red en vivo.")
+            guardar_base_datos(nueva_bd_filtrada)
+            st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publicación(es) de la red nacional.")
             st.balloons()
             st.rerun()
         else:
@@ -133,7 +147,7 @@ if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_uni
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE REGISTRO DE ALERTA (SISTEMA DE GRABACIÓN DIRECTO EN MEMORIA VIVA) ---
+# --- 3️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
@@ -149,13 +163,15 @@ st.write("📋 Datos del Responsable:")
 nombre_rescatista = st.text_input("Nombre del Dueño / Rescatista")
 lugar_hecho = st.text_input("¿Dónde ocurrió? (Ej: Barrio Satélite, Moreno)")
 fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
-telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)")
+
+# Llave de aislamiento pura para destrabar el botón de guardado masivo de corrido
+telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)", key="casillero_registro_telefono_moreno_puro")
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), np.uint8)
+        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
@@ -178,8 +194,3 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                nueva_mascota = {
-                    "tipo_alerta": str(tipo_alerta),
-                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
-                    "raza": str(raza_perro) if raza_perro else "No específica",
-                    "color": str(color_perro) if color_perro else "No especificado",
