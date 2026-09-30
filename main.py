@@ -65,47 +65,54 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
             if not bd:
                 st.warning("📭 La base de datos nacional está vacía. Registrá una mascota abajo primero.")
             else:
-                mejor_coincidencia = None
-                mayor_porcentaje = 0.0
+                coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
                 
+                # Recorremos toda la red y guardamos todos los que se parezcan
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
+                    porcentaje = float(similitud) * 100
                     
-                    # BLINDAJE MATEMÁTICO CONTRA EL TYPEERROR: Extraemos la posición exacta rompiendo los corchetes
-                    porcentaje = float(similitud[0][0]) * 100
-                    
-                    if porcentaje > mayor_porcentaje:
-                        mayor_porcentaje = porcentaje
-                        mejor_coincidencia = mascota
-                        
-                if mejor_coincidencia and mayor_porcentaje > 65:
-                    st.success(f"📊 ¡COINCIDENCIA ENCONTRADA CON ÉXITO! ({mayor_porcentaje:.2f}% de parecido)")
-                    
-                    tipo_match = mejor_coincidencia.get('tipo_alerta', 'Perdido')
-                    cartel_tipo = "🔴 ALERTA: PERDIDO" if tipo_match == "Perdido" else "🟢 ALERTA: ENCONTRADO"
-                    
-                    st.markdown(f"### {cartel_tipo}")
-                    st.info(f"👤 **Responsable:** {mejor_coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {mejor_coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {mejor_coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {mejor_coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {mejor_coincidencia.get('raza', 'No específica')} | {mejor_coincidencia.get('color', 'No especificado')} \n📝 **Detalles particulares:** {mejor_coincidencia.get('detalles', 'Sin detalles adicionales')}")
-                    
-                    # CONTACTO MANUAL INDESTRUCTIBLE
-                    numero_match = mejor_coincidencia.get('contacto', '')
-                    st.markdown("### 📱 Teléfono de Contacto:")
-                    st.write("Copiá el número de abajo para comunicarte con el responsable:")
-                    st.code(f"{numero_match}", language="text")
-                    st.write("") 
-                    
-                    # RENDERIZADO EN BASE64 PARA EL MATCH
-                    foto_b64 = mejor_coincidencia.get('ruta_imagen', '')
-                    if foto_b64 and foto_b64 != "error":
-                        try:
-                            bytes_decor = base64.b64decode(foto_b64)
-                            st.image(bytes_decor, caption="Foto oficial de la mascota encontrada", use_container_width=True)
-                        except:
-                            st.text("📷 Foto no compatible")
-                else:
+                    # Si supera el umbral del 65%, entra al ranking de sospechosos
+                    if porcentaje >= 65:
+                        mascota_con_score = mascota.copy()
+                        mascota_con_score["porcentaje_match"] = porcentaje
+                        coincidencias_encontradas.append(mascota_con_score)
+                
+                # Ordenamos el ranking en vivo de mayor a menor parecido
+                coincidencias_encontradas = sorted(coincidencias_encontradas, key=lambda x: x["porcentaje_match"], reverse=True)
+                
+                if not coincidencias_encontradas:
                     st.error("❌ No se encontraron coincidencias similares en el sistema.")
+                else:
+                    st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias en la red nacional!")
+                    
+                    # Dibujamos en pantalla una placa para cada perro similar encontrado
+                    for idx, coincidencia in enumerate(coincidencias_encontradas):
+                        porcentaje_actual = coincidencia["porcentaje_match"]
+                        
+                        with st.container(border=True):
+                            st.markdown(f"### 🎯 Opción #{idx + 1} - Coincidencia del {porcentaje_actual:.2f}%")
+                            
+                            tipo_match = coincidencia.get('tipo_alerta', 'Perdido')
+                            cartel_tipo = "🔴 ESTADO: PERDIDO" if tipo_match == "Perdido" else "🟢 ESTADO: ENCONTRADO"
+                            st.write(cartel_tipo)
+                            
+                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No especificado')} \n📝 **Detalles particulares:** {coincidencia.get('detalles', 'Sin detalles adicionales')}")
+                            
+                            numero_match = coincidencia.get('contacto', '')
+                            st.markdown("**📱 Teléfono de Contacto:**")
+                            st.code(f"{numero_match}", language="text")
+                            
+                            foto_b64 = coincidencia.get('ruta_imagen', '')
+                            if foto_b64 and foto_b64 != "error":
+                                try:
+                                    bytes_decor = base64.b64decode(foto_b64)
+                                    st.image(bytes_decor, use_container_width=True)
+                                except:
+                                    st.text("📷 Foto no compatible")
+                            st.write("")
     else:
         st.warning("⚠️ Primero tenés que subir una foto en el recuadro de arriba para poder buscar.")
 
@@ -115,7 +122,6 @@ st.divider()
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
-# CASILLEROS COMUNITARIOS COMPLETOS FIJOS EN LA PANTALLA PRINCIPAL
 tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
 img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
 nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
@@ -134,7 +140,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
+        file_bytes = np.asarray(bytearray(img_file.read()), np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
