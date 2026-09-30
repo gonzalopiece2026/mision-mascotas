@@ -69,9 +69,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 vector_u = np.array(huella_usuario).reshape(1, -1)
                 
                 for mascota in bd:
-                    huella_db = np.array(mascota["huella"]).reshape(1, -1)
+                    huella_db = np.array(mascota.get("huella", [])).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(np.ravel(similitud)) * 100
+                    porcentaje = float(np.ravel(similitul if 'similitul' in globals() else similitud)) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
@@ -167,17 +167,15 @@ telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)", key=
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
-                
         bytes_datos_foto = img_file.getvalue()
         file_bytes = np.asarray(bytearray(bytes_datos_foto), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
-        
         huella = extraer_huella_segura(img_bgr)
         
         if huella is None:
             st.error("❌ Ocurrió un problema al procesar la imagen.")
         else:
-            with st.spinner("Procesando y encriptando imagen de forma nativa viva..."):
+            with st.spinner("Procesando y encriptando imagen..."):
                 try:
                     foto_b64_string = base64.b64encode(bytes_datos_foto).decode('utf-8')
                 except Exception as b64_err:
@@ -185,12 +183,13 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     foto_b64_string = "error"
             
             if foto_b64_string == "error":
-                st.error("❌ Error interno al procesar la vista previa. Intenta con otra imagen.")
+                st.error("❌ Error interno al procesar la vista previa.")
             else:
                 fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                # CORRECCIÓN DE HERMETISMO EN UN SOLO BLOQUE RECTO SEGURO INDEPENDIENTE
-                ficha_perro = {
-                    "tipo_alerta": str(tipo_alerta),
+                # REESTRUCTURACIÓN MAESTRA ANTI-CACHÉ: Inyectamos los datos planos directo sin llaves colgadas
+                bd = cargar_base_datos()
+                bd.append(dict(
+                    tipo_alerta=str(tipo_alerta),
