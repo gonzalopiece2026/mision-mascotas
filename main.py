@@ -54,7 +54,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
         bd = cargar_base_datos()
         
-        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES ROJOS
+        # ESCUDO DE SEGURIDAD ABSOLUTO: Si la base de datos está vacía, frenamos en seco antes de ejecutar la fórmula matemática
         if not bd or len(bd) == 0:
             st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
         else:
@@ -74,8 +74,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # Extracción lineal plana directa de Scikit-Learn segura
-                    porcentaje = float(similitud) * 100
+                    # EXTRACTOR INDEXADO PLANO SEGURO: Rompe las dos cajas de corchetes nativas de scikit-learn [0][0]
+                    porcentaje = float(similitud[0][0]) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
@@ -140,7 +140,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
+        file_bytes = np.asarray(bytearray(img_file.read()), np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
@@ -167,7 +167,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "tipo_alerta": str(tipo_alerta),
                     "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
                     "raza": str(raza_perro) if raza_perro else "No específica",
-                    "color": str(color_perro) if color_perro else "No de pelaje",
+                    "color": str(color_perro) if color_perro else "No especificado",
                     "detalles": str(detalles_perro) if detalles_perro else "Sin detalles",
                     "nombre_dueño": str(nombre_rescatista),
                     "zona": str(lugar_hecho),
@@ -188,7 +188,5 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y FIJA AFUERA DE TODO ---
+# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y COMPLETAMENTE FIJA FUERA DE TODO ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
-st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
-
