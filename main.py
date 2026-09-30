@@ -52,18 +52,20 @@ img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jp
 
 if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
-        file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
-        img_bgr = cv2.imdecode(file_bytes, 1)
+        bd = cargar_base_datos()
         
-        with st.spinner("Buscando coincidencias en la base de datos..."):
-            huella_usuario = extraer_huella_segura(img_bgr)
-            
-        if huella_usuario is None:
-            st.error("❌ No se pudo procesar la imagen de búsqueda.")
+        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES ROJOS
+        if not bd or len(bd) == 0:
+            st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
         else:
-            bd = cargar_base_datos()
-            if not bd or len(bd) == 0:
-                st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
+            file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
+            img_bgr = cv2.imdecode(file_bytes, 1)
+            
+            with st.spinner("Buscando coincidencias en la base de datos..."):
+                huella_usuario = extraer_huella_segura(img_bgr)
+                
+            if huella_usuario is None:
+                st.error("❌ No se pudo procesar la imagen de búsqueda.")
             else:
                 coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
@@ -71,7 +73,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota.get("huella", [])).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(np.ravel(similitud)) * 100
+                    
+                    # EXTRACTOR INDEXADO PLANO SEGURO INDESTRUCTIBLE
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
@@ -172,7 +176,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "fecha_hecho": str(fecha_hecho_str),
                     "fecha_subida": str(fecha_subida_str)
                 })
-                sig = guardar_base_datos(bd)
+                guardar_base_datos(bd)
                 st.success(f"✅ ¡Éxito total! Alerta guardada con éxito en la red nacional.")
                 st.rerun()
     else:
