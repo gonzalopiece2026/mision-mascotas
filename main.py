@@ -63,7 +63,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
         else:
             bd = cargar_base_datos()
             if not bd or len(bd) == 0:
-                st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
+                st.warning("📭 La base de datos nacional está vacía en este momento. Registrá una mascota abajo primero para poder realizar búsquedas.")
             else:
                 coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
@@ -110,7 +110,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                                     st.text("📷 Foto no compatible")
                             st.write("")
     else:
-        st.warning("⚠️ Primero tenés que subir una foto en el recuadro of arriba para poder buscar.")
+        st.warning("⚠️ Primero tenés que subir una foto en el recuadro de arriba para poder buscar.")
 
 st.divider()
 
@@ -118,7 +118,6 @@ st.divider()
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
-# Llave de aislamiento total para que no se choque con el formulario de abajo
 baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_exclusivo")
 
 if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_universal_moreno_ok_final"):
@@ -163,15 +162,16 @@ st.write("📋 Datos del Responsable:")
 nombre_rescatista = st.text_input("Nombre del Dueño / Rescatista")
 lugar_hecho = st.text_input("¿Dónde ocurrió? (Ej: Barrio Satélite, Moreno)")
 fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
-
-# Llave de aislamiento pura para destrabar el botón de guardado masivo de corrido
 telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)", key="casillero_registro_telefono_moreno_puro")
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
+        # Leemos los bytes del cargador de archivos de internet
+        bytes_datos_foto = img_file.getvalue()
+        
+        file_bytes = np.asarray(bytearray(bytes_datos_foto), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
@@ -181,8 +181,8 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         else:
             with st.spinner("Procesando y encriptando imagen de forma nativa viva..."):
                 try:
-                    _, buffer = cv2.imencode('.jpg', img_bgr)
-                    foto_b64_string = base64.b64encode(buffer).decode('utf-8')
+                    # CORRECCIÓN MAESTRA: Codificamos de forma directa los bytes puros para evitar fallas de RAM en la nube
+                    foto_b64_string = base64.b64encode(bytes_datos_foto).decode('utf-8')
                 except Exception as b64_err:
                     print(f"Error Base64: {b64_err}")
                     foto_b64_string = "error"
