@@ -68,19 +68,16 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
                 
-                # Recorremos toda la red y guardamos todos los que se parezcan
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     porcentaje = float(np.ravel(similitud)) * 100
                     
-                    # Si supera el umbral del 65%, entra al ranking de sospechosos
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
                         coincidencias_encontradas.append(mascota_con_score)
                 
-                # Ordenamos el ranking en vivo de mayor a menor parecido
                 coincidencias_encontradas = sorted(coincidencias_encontradas, key=lambda x: x["porcentaje_match"], reverse=True)
                 
                 if not coincidencias_encontradas:
@@ -187,7 +184,11 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA DESACTIVACIÓN UNIVERSAL COMPILADA FIJA ---
+# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y FIJA EN PANTALLA ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
-st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono de registro para remover tus publicaciones de la red nacional.")
+st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
+# FIJADO NATIVO EXTRA: Forzamos el casillero para que aparezca libre de dependencias de la URL
+baja_telefono_fijo = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_fijo_total_moreno")
+
+if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_final_total"):
