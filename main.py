@@ -54,7 +54,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
         bd = cargar_base_datos()
         
-        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES ROJOS
+        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES: Si el archivo tiene solo [], frenamos acá de forma limpia
         if not bd or len(bd) == 0:
             st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
         else:
@@ -74,8 +74,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota.get("huella", [])).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # EXTRACTOR INDEXADO PLANO SEGURO INDESTRUCTIBLE
-                    porcentaje = float(similitud) * 100
+                    # EXTRACTOR INDEXADO PLANO SEGURO PROTEGIDO POR EL ESCUDO
+                    porcentaje = float(np.ravel(similitud)) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
@@ -118,7 +118,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
 
 st.divider()
 
-# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA (RESTAURADA E INDESTRUCTIBLE) ---
+# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
