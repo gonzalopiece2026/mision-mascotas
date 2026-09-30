@@ -72,9 +72,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    
-                    # CORRECCIÓN MAESTRA DEFINITIVA: Posicionamiento indexado forzado para pulverizar el TypeError
-                    porcentaje = float(similitud[0][0]) * 100
+                    porcentaje = float(np.ravel(similitud)) * 100
                     
                     # Si supera el umbral del 65%, entra al ranking de sospechosos
                     if porcentaje >= 65:
@@ -90,7 +88,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 else:
                     st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias en la red nacional!")
                     
-                    # Dibujamos en pantalla una placa para cada perro similar encontrado
                     for idx, coincidencia in enumerate(coincidencias_encontradas):
                         porcentaje_actual = coincidencia["porcentaje_match"]
                         
@@ -190,5 +187,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA DESACTIVACIÓN UNIVERSAL SÓLO POR NÚMERO DE TELÉFONO ---
+# --- 3️⃣ SECCIÓN DE BAJA DESACTIVACIÓN UNIVERSAL COMPILADA FIJA ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
+st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono de registro para remover tus publicaciones de la red nacional.")
+
