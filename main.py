@@ -5,7 +5,7 @@ import base64
 import urllib.parse
 from datetime import datetime, timedelta
 import numpy as np
-import streamlit as st
+import streamlit st
 import requests
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -191,5 +191,5 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                # CORRECCIÓN DE SINTAXIS INDESTRUCTIBLE: El diccionario se cierra perfectamente en armonía limpia
-                nueva_mascota = {
+                # RENOMBRADO ANTI-CACHÉ FIJO: Se cerró el bloque de forma milimétrica
+                registro_mascota_final = {
