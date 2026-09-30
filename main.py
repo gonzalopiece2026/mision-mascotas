@@ -54,7 +54,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
         bd = cargar_base_datos()
         
-        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES ROJOS
+        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES ROJOS / ROSAS
         if not bd or len(bd) == 0:
             st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
         else:
@@ -73,7 +73,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota.get("huella", [])).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(np.ravel(similitud)) * 100
+                    
+                    # EXTRACTOR INDEXADO PLANO PROTEGIDO POR EL ESCUDO SUPERIOR
+                    porcentaje = float(np.squeeze(similitud)) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
@@ -116,7 +118,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
 
 st.divider()
 
-# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
+# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA (ESTABLE E INDESTRUCTIBLE) ---
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
@@ -134,7 +136,7 @@ lugar_hecho = st.text_input("¿Dónde ocurrió? (Ej: Barrio Satélite, Moreno)")
 fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
 telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)", key="casillero_registro_telefono_moreno_puro")
 
-if st.button("Save en la Red Nacional", key="btn_guardar_principal"):
+if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
         bytes_datos_foto = img_file.getvalue()
@@ -182,10 +184,9 @@ if st.button("Save en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ NUEVA SECCIÓN DE BAJA UNIVERSAL FIJA ALINEADA PLANAMENTE AL MARGEN IZQUIERDO ---
+# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE UBICADA FIJA ABAJO DE TODO ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
 baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_final_ar")
 
-# SANGRIAS REPARADAS: Alineación en un solo bloque recto simétrico obligatorio
