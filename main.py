@@ -55,7 +55,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
         file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
-        with st.spinner("Buscando coincidencias en la base de datos..."):
+        with st.spinner("Buscando coincidencias in la base de datos..."):
             huella_usuario = extraer_huella_segura(img_bgr)
             
         if huella_usuario is None:
@@ -189,7 +189,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                # CIERRE HERMÉTICO ABSOLUTO: Se creó el diccionario limpio por fuera sin paréntesis cruzados
-                ficha_perro = {
-                    "tipo_alerta": str(tipo_alerta),
-                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
+                # REESTRUCTURACIÓN DEFINITIVA UTILIZANDO DICT() SIN SIGNOS DE LLAVES COLGADOS
+                ficha_perro = dict(
+                    tipo_alerta=str(tipo_alerta),
+                    nombre_perro=str(nombre_perro).strip() if nombre_perro else "No especificado",
