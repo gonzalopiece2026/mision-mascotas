@@ -177,7 +177,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         if huella is None:
             st.error("❌ Ocurrió un problema al procesar la imagen.")
         else:
-            with st.spinner("Procesando y encriptando imagen..."):
+            with st.spinner("Procesando y encriptando imagen de forma nativa viva..."):
                 try:
                     foto_b64_string = base64.b64encode(bytes_datos_foto).decode('utf-8')
                 except Exception as b64_err:
@@ -185,14 +185,12 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     foto_b64_string = "error"
             
             if foto_b64_string == "error":
-                st.error("❌ Error interno al procesar la vista previa.")
+                st.error("❌ Error interno al procesar la vista previa. Intenta con otra imagen.")
             else:
                 fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                # BLINDAJE ABSOLUTO NATIVO REESTRUCTURADO SIN DICCIONARIOS COLGADOS
-                bd = cargar_base_datos()
-                bd.append({
+                # CORRECCIÓN DE HERMETISMO EN UN SOLO BLOQUE RECTO SEGURO INDEPENDIENTE
+                ficha_perro = {
                     "tipo_alerta": str(tipo_alerta),
-                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
