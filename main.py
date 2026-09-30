@@ -71,7 +71,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota.get("huella", [])).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(np.ravel(similitul if 'similitul' in globals() else similitud)) * 100
+                    porcentaje = float(np.ravel(similitud)) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
@@ -189,7 +189,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                # REESTRUCTURACIÓN MAESTRA ANTI-CACHÉ: Inyectamos los datos planos directo sin llaves colgadas
-                bd = cargar_base_datos()
-                bd.append(dict(
-                    tipo_alerta=str(tipo_alerta),
+                # CIERRE HERMÉTICO ABSOLUTO: Se creó el diccionario limpio por fuera sin paréntesis cruzados
+                ficha_perro = {
+                    "tipo_alerta": str(tipo_alerta),
+                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
