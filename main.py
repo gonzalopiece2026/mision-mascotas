@@ -95,7 +95,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                             cartel_tipo = "🔴 ESTADO: PERDIDO" if tipo_match == "Perdido" else "🟢 ESTADO: ENCONTRADO"
                             st.write(cartel_tipo)
                             
-                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')} \n📝 **Detalles particulares:** {coincidencia.get('detalles', 'Sin detalles adicionales')}")
+                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')}")
                             
                             numero_match = coincidencia.get('contacto', '')
                             st.markdown("**📱 Teléfono de Contacto:**")
@@ -136,7 +136,7 @@ if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_uni
                 
         if cantidad_removidos > 0:
             guardar_base_datos(nueva_bd_filtrada)
-            st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publication(es) de la red nacional.")
+            st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publicación(es) de la red nacional.")
             st.balloons()
             st.rerun()
         else:
@@ -177,7 +177,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         if huella is None:
             st.error("❌ Ocurrió un problema al procesar la imagen.")
         else:
-            with st.spinner("Procesando y encriptando imagen de forma nativa viva..."):
+            with st.spinner("Procesando y encriptando imagen..."):
                 try:
                     foto_b64_string = base64.b64encode(bytes_datos_foto).decode('utf-8')
                 except Exception as b64_err:
@@ -185,11 +185,14 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     foto_b64_string = "error"
             
             if foto_b64_string == "error":
-                st.error("❌ Error interno al procesar la vista previa. Intenta con otra imagen.")
+                st.error("❌ Error interno al procesar la vista previa.")
             else:
                 fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                # CORRECCIÓN DE LLAVE DEFINITIVA: Se cerró el diccionario de forma perfecta con "}"
-                registro_mascota_final = {
+                # BLINDAJE ABSOLUTO NATIVO REESTRUCTURADO SIN DICCIONARIOS COLGADOS
+                bd = cargar_base_datos()
+                bd.append({
+                    "tipo_alerta": str(tipo_alerta),
+                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
