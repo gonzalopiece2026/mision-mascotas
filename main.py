@@ -62,6 +62,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
             st.error("❌ No se pudo procesar la imagen de búsqueda.")
         else:
             bd = cargar_base_datos()
+            # ESCUDO DE SEGURIDAD ABSOLUTO: Si la base de datos está vacía, frenamos en seco antes de ejecutar la fórmula matemática
             if not bd or len(bd) == 0:
                 st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
             else:
@@ -71,6 +72,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
+                    
+                    # EXTRACTOR INDEXADO PLANO SEGURO: Rompe las dos cajas de corchetes nativas de scikit-learn
                     porcentaje = float(similitud) * 100
                     
                     if porcentaje >= 65:
@@ -114,7 +117,40 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
 
 st.divider()
 
-# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
+# --- 2️⃣ NUEVA SECCIÓN DE BAJA INDESTRUCTIBLE UBICADA ESTRATÉGICAMENTE EN EL CENTRO ---
+st.header("✨ Misión Cumplida: Dar de Baja Alerta")
+st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
+
+# Se inyecta el casillero blanco de baja arriba del formulario con clave limpia para forzar su aparición recta en Chrome
+baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026")
+
+if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_universal_moreno_ok"):
+    if baja_telefono_fijo_ok:
+        tel_baja_limpio = "".join(filter(str.isdigit, baja_telefono_fijo_ok))
+        bd_actual = cargar_base_datos()
+        
+        cantidad_removidos = 0
+        nueva_bd_filtrada = []
+        
+        for m in bd_actual:
+            if m.get("contacto", "") == tel_baja_limpio:
+                cantidad_removidos += 1
+            else:
+                nueva_bd_filtrada.append(m)
+                
+        if cantidad_removidos > 0:
+            guardar_base_datos(nueva_bd_filtrada)
+            st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publicación(es) de la red nacional.")
+            st.balloons()
+            st.rerun()
+        else:
+            st.error("❌ No se encontró ninguna alerta activa registrada con ese número de teléfono celular.")
+    else:
+        st.warning("⚠️ Debes ingresar el número de teléfono con el que realizaste la publicación para validar la baja.")
+
+st.divider()
+
+# --- 3️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
@@ -136,7 +172,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), np.uint8)
+        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
@@ -156,36 +192,3 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 st.error("❌ Error interno al procesar la vista previa. Intenta con otra imagen.")
             else:
                 fecha_hecho_str = fecha_suceso.strftime("%d/%m/%Y")
-                hora_argentina = datetime.now() - timedelta(hours=3)
-                fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
-                
-                nueva_mascota = {
-                    "tipo_alerta": str(tipo_alerta),
-                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
-                    "raza": str(raza_perro) if raza_perro else "No específica",
-                    "color": str(color_perro) if color_perro else "No especificado",
-                    "detalles": str(detalles_perro) if detalles_perro else "Sin detalles",
-                    "nombre_dueño": str(nombre_rescatista),
-                    "zona": str(lugar_hecho),
-                    "contacto": str(num_limpio),
-                    "ruta_imagen": str(foto_b64_string),
-                    "huella": huella,
-                    "fecha_hecho": str(fecha_hecho_str),
-                    "fecha_subida": str(fecha_subida_str)
-                }
-                
-                bd = cargar_base_datos()
-                bd.append(nueva_mascota)
-                guardar_base_datos(bd)
-                st.success("✅ ¡Éxito! Mascota registrada de forma instantánea en la red federal.")
-                st.rerun()
-    else:
-        st.warning("⚠️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
-
-st.divider()
-
-# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y COMPLETAMENTE FIJA FUERA DE TODO (NUNCA SE BORRA) ---
-st.header("✨ Misión Cumplida: Dar de Baja Alerta")
-st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
-
-# Se inyecta el casillero purificado libre de la palabra globals() rota para forzar su aparición en internet
