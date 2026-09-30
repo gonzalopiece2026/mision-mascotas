@@ -71,7 +71,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(np.ravel(similitud)) * 100
+                    
+                    # CORRECCIÓN DEFINITIVA DE LA LÍNEA 74: Extracción indexada directa para evitar errores de numpy
+                    porcentaje = float(similitud) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
@@ -184,10 +186,9 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y FIJA EN PANTALLA REPARADA ---
+# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y FIJA EN PANTALLA ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
 baja_telefono_fijo = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_fijo_total_moreno")
 
-# CORRECCIÓN DE ALINEACIÓN MAESTRA: Se alineó perfectamente el bloque del botón con el margen del comando IF
