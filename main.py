@@ -134,7 +134,7 @@ lugar_hecho = st.text_input("¿Dónde ocurrió? (Ej: Barrio Satélite, Moreno)")
 fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
 telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)", key="casillero_registro_telefono_moreno_puro")
 
-if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
+if st.button("Save en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
         bytes_datos_foto = img_file.getvalue()
@@ -182,11 +182,10 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ NUEVA SECCIÓN DE BAJA INDESTRUCTIBLE Y TOTALMENTE AISLADA ABAJO DE TODO ---
-with st.container():
-    st.header("✨ Misión Cumplida: Dar de Baja Alerta")
-    st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
-    
-    baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_final")
-    
-    if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_universal_moreno_ok_final"):
+# --- 3️⃣ NUEVA SECCIÓN DE BAJA UNIVERSAL FIJA ALINEADA PLANAMENTE AL MARGEN IZQUIERDO ---
+st.header("✨ Misión Cumplida: Dar de Baja Alerta")
+st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
+
+baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_final_ar")
+
+# SANGRIAS REPARADAS: Alineación en un solo bloque recto simétrico obligatorio
