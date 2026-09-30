@@ -62,7 +62,6 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
             st.error("❌ No se pudo procesar la imagen de búsqueda.")
         else:
             bd = cargar_base_datos()
-            # ESCUDO DE SEGURIDAD ABSOLUTO: Si la base de datos está vacía, frenamos en seco antes de ejecutar la fórmula matemática
             if not bd or len(bd) == 0:
                 st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
             else:
@@ -72,11 +71,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
+                    porcentaje = float(similitud) * 100
                     
-                    # EXTRACTOR INDEXADO PLANO SEGURO: Rompe las dos cajas de corchetes nativas de scikit-learn
-                    porcentaje = float(similitud[0][0]) * 100
-                    
-                    # Si supera el umbral del 65%, entra al ranking de sospechosos
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
@@ -190,3 +186,6 @@ st.divider()
 
 # --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y COMPLETAMENTE FIJA FUERA DE TODO (NUNCA SE BORRA) ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
+st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
+
+# Se fuerza la creación de las variables de baja con una clave estática nativa única para que queden visibles sí o sí
