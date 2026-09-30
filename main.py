@@ -52,36 +52,35 @@ img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jp
 
 if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
-        bd = cargar_base_datos()
+        file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
+        img_bgr = cv2.imdecode(file_bytes, 1)
         
-        # ESCUDO DE SEGURIDAD ABSOLUTO: Si la base de datos está vacía, frenamos en seco antes de ejecutar la fórmula matemática
-        if not bd or len(bd) == 0:
-            st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
-        else:
-            file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
-            img_bgr = cv2.imdecode(file_bytes, 1)
+        with st.spinner("Buscando coincidencias en la base de datos..."):
+            huella_usuario = extraer_huella_segura(img_bgr)
             
-            with st.spinner("Buscando coincidencias en la base de datos..."):
-                huella_usuario = extraer_huella_segura(img_bgr)
-                
-            if huella_usuario is None:
-                st.error("❌ No se pudo procesar la imagen de búsqueda.")
+        if huella_usuario is None:
+            st.error("❌ No se pudo procesar la imagen de búsqueda.")
+        else:
+            bd = cargar_base_datos()
+            if not bd:
+                st.warning("📭 La base de datos nacional está vacía. Registrá una mascota abajo primero.")
             else:
                 coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
                 
+                # Recorremos toda la red y guardamos todos los que se parezcan
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
+                    porcentaje = float(np.ravel(similitud)) * 100
                     
-                    # EXTRACTOR INDEXADO PLANO SEGURO: Rompe las dos cajas de corchetes nativas de scikit-learn [0][0]
-                    porcentaje = float(similitud[0][0]) * 100
-                    
+                    # Si supera el umbral del 65%, entra al ranking de sospechosos
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
                         coincidencias_encontradas.append(mascota_con_score)
                 
+                # Ordenamos el ranking en vivo de mayor a menor parecido
                 coincidencias_encontradas = sorted(coincidencias_encontradas, key=lambda x: x["porcentaje_match"], reverse=True)
                 
                 if not coincidencias_encontradas:
@@ -140,7 +139,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        file_bytes = np.asarray(bytearray(img_file.read()), np.uint8)
+        file_bytes = np.asarray(bytearray(img_file.read()), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
         huella = extraer_huella_segura(img_bgr)
@@ -188,5 +187,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y COMPLETAMENTE FIJA FUERA DE TODO ---
+# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y COMPLETAMENTE FIJA FUERA DE TODO (NUNCA SE BORRA) ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
+st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
+
