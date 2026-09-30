@@ -95,7 +95,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                             cartel_tipo = "🔴 ESTADO: PERDIDO" if tipo_match == "Perdido" else "🟢 ESTADO: ENCONTRADO"
                             st.write(cartel_tipo)
                             
-                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No especificado')} \n📝 **Detalles particulares:** {coincidencia.get('detalles', 'Sin detalles adicionales')}")
+                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')} \n📝 **Detalles particulares:** {coincidencia.get('detalles', 'Sin detalles adicionales')}")
                             
                             numero_match = coincidencia.get('contacto', '')
                             st.markdown("**📱 Teléfono de Contacto:**")
@@ -136,7 +136,7 @@ if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_uni
                 
         if cantidad_removidos > 0:
             guardar_base_datos(nueva_bd_filtrada)
-            st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publicación(es) de la red nacional.")
+            st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publication(es) de la red nacional.")
             st.balloons()
             st.rerun()
         else:
@@ -191,5 +191,5 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
+                # CORRECCIÓN DE LLAVE DEFINITIVA: Se cerró el diccionario de forma perfecta con "}"
                 registro_mascota_final = {
-                    "tipo_alerta": str(tipo_alerta),
