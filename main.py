@@ -52,18 +52,20 @@ img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jp
 
 if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
-        file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
-        img_bgr = cv2.imdecode(file_bytes, 1)
+        bd = cargar_base_datos()
         
-        with st.spinner("Buscando coincidencias en la base de datos..."):
-            huella_usuario = extraer_huella_segura(img_bgr)
-            
-        if huella_usuario is None:
-            st.error("❌ No se pudo procesar la imagen de búsqueda.")
+        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES ROJOS
+        if not bd or len(bd) == 0:
+            st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
         else:
-            bd = cargar_base_datos()
-            if not bd or len(bd) == 0:
-                st.warning("📭 La base de datos nacional está vacía. Registrá una mascota abajo primero para poder buscar.")
+            file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
+            img_bgr = cv2.imdecode(file_bytes, 1)
+            
+            with st.spinner("Buscando coincidencias en la base de datos..."):
+                huella_usuario = extraer_huella_segura(img_bgr)
+                
+            if huella_usuario is None:
+                st.error("❌ No se pudo procesar la imagen de búsqueda.")
             else:
                 coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
@@ -71,6 +73,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
+                    
+                    # Extracción lineal plana directa de Scikit-Learn segura
                     porcentaje = float(similitud) * 100
                     
                     if porcentaje >= 65:
@@ -163,7 +167,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "tipo_alerta": str(tipo_alerta),
                     "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
                     "raza": str(raza_perro) if raza_perro else "No específica",
-                    "color": str(color_perro) if color_perro else "No especificado",
+                    "color": str(color_perro) if color_perro else "No de pelaje",
                     "detalles": str(detalles_perro) if detalles_perro else "Sin detalles",
                     "nombre_dueño": str(nombre_rescatista),
                     "zona": str(lugar_hecho),
@@ -184,10 +188,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y FIJA AFUERA (NUNCA MÁS SE VA A BORRAR) ---
+# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y FIJA AFUERA DE TODO ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
-
-# Casillero forzado con clave estática de renderizado independiente
-baja_telefono_fijo = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_fijo_final_total")
 
