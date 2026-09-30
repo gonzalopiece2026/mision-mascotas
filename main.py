@@ -55,7 +55,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
         file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
-        with st.spinner("Buscando coincidencias in la base de datos..."):
+        with st.spinner("Buscando coincidencias en la base de datos..."):
             huella_usuario = extraer_huella_segura(img_bgr)
             
         if huella_usuario is None:
@@ -114,39 +114,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
 
 st.divider()
 
-# --- 2️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE UBICADA ESTRATÉGICAMENTE EN EL CENTRO ---
-st.header("✨ Misión Cumplida: Dar de Baja Alerta")
-st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
-
-baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_exclusivo")
-
-if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_universal_moreno_ok_final"):
-    if baja_telefono_fijo_ok:
-        tel_baja_limpio = "".join(filter(str.isdigit, baja_telefono_fijo_ok))
-        bd_actual = cargar_base_datos()
-        
-        cantidad_removidos = 0
-        nueva_bd_filtrada = []
-        
-        for m in bd_actual:
-            if m.get("contacto", "") == tel_baja_limpio:
-                cantidad_removidos += 1
-            else:
-                nueva_bd_filtrada.append(m)
-                
-        if cantidad_removidos > 0:
-            guardar_base_datos(nueva_bd_filtrada)
-            st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publicación(es) de la red nacional.")
-            st.balloons()
-            st.rerun()
-        else:
-            st.error("❌ No se encontró ninguna alerta activa registrada con ese número de teléfono celular.")
-    else:
-        st.warning("⚠️ Debes ingresar el número de teléfono con el que realizaste la publicación para validar la baja.")
-
-st.divider()
-
-# --- 3️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
+# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA (RESTAURADA E INDESTRUCTIBLE) ---
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
@@ -189,7 +157,30 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                # REESTRUCTURACIÓN DEFINITIVA UTILIZANDO DICT() SIN SIGNOS DE LLAVES COLGADOS
-                ficha_perro = dict(
-                    tipo_alerta=str(tipo_alerta),
-                    nombre_perro=str(nombre_perro).strip() if nombre_perro else "No especificado",
+                bd = cargar_base_datos()
+                bd.append({
+                    "tipo_alerta": str(tipo_alerta),
+                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
+                    "raza": str(raza_perro) if raza_perro else "No específica",
+                    "color": str(color_perro) if color_perro else "No especificado",
+                    "detalles": str(detalles_perro) if detalles_perro else "Sin detalles",
+                    "nombre_dueño": str(nombre_rescatista),
+                    "zona": str(lugar_hecho),
+                    "contacto": str(num_limpio),
+                    "ruta_imagen": str(foto_b64_string),
+                    "huella": huella,
+                    "fecha_hecho": str(fecha_hecho_str),
+                    "fecha_subida": str(fecha_subida_str)
+                })
+                sig = guardar_base_datos(bd)
+                st.success(f"✅ ¡Éxito total! Alerta guardada con éxito en la red nacional.")
+                st.rerun()
+    else:
+        st.warning("⚠️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
+
+st.divider()
+
+# --- 3️⃣ SECCIÓN DE DONACIONES ---
+st.header("💝 Apoyá a Misión Mascotas")
+st.write("Tu donación nos ayuda a mantener los servidores online las 24 horas.")
+st.link_button("✨ COLABORAR CON MONTO LIBRE", "https://mercadopago.com.ar")
