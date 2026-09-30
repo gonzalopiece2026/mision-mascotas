@@ -95,7 +95,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                             cartel_tipo = "🔴 ESTADO: PERDIDO" if tipo_match == "Perdido" else "🟢 ESTADO: ENCONTRADO"
                             st.write(cartel_tipo)
                             
-                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No especificado')} \n📝 **Detalles particulares:** {coincidencia.get('detalles', 'Sin detalles adicionales')}")
+                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')} \n📝 **Detalles particulares:** {coincidencia.get('detalles', 'Sin detalles adicionales')}")
                             
                             numero_match = coincidencia.get('contacto', '')
                             st.markdown("**📱 Teléfono de Contacto:**")
@@ -138,7 +138,6 @@ if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_uni
             guardar_base_datos(nueva_bd_filtrada)
             st.success(f"🎉 ¡Felicidades! Se removieron con éxito {cantidad_removidos} publicación(es) de la red nacional.")
             st.balloons()
-            st.rerun()
         else:
             st.error("❌ No se encontró ninguna alerta activa registrada con ese número de teléfono celular.")
     else:
@@ -168,9 +167,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
         num_limpio = "".join(filter(str.isdigit, telefono_contacto))
                 
-        # Leemos los bytes del cargador de archivos de internet
         bytes_datos_foto = img_file.getvalue()
-        
         file_bytes = np.asarray(bytearray(bytes_datos_foto), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
         
@@ -181,7 +178,6 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
         else:
             with st.spinner("Procesando y encriptando imagen de forma nativa viva..."):
                 try:
-                    # CORRECCIÓN MAESTRA: Codificamos de forma directa los bytes puros para evitar fallas de RAM en la nube
                     foto_b64_string = base64.b64encode(bytes_datos_foto).decode('utf-8')
                 except Exception as b64_err:
                     print(f"Error Base64: {b64_err}")
@@ -194,3 +190,6 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
+                nueva_mascota = {
+                    "tipo_alerta": str(tipo_alerta),
+                    "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
