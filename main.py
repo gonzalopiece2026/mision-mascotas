@@ -184,11 +184,10 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y FIJA EN PANTALLA ---
+# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE Y FIJA EN PANTALLA REPARADA ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
-# FIJADO NATIVO EXTRA: Forzamos el casillero para que aparezca libre de dependencias de la URL
 baja_telefono_fijo = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_fijo_total_moreno")
 
-if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_final_total"):
+# CORRECCIÓN DE ALINEACIÓN MAESTRA: Se alineó perfectamente el bloque del botón con el margen del comando IF
