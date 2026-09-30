@@ -54,7 +54,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
         bd = cargar_base_datos()
         
-        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES: Si el archivo tiene solo [], frenamos acá de forma limpia
+        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES: Frenamos en seco antes de ejecutar la fórmula si no hay datos
         if not bd or len(bd) == 0:
             st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
         else:
@@ -74,8 +74,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     huella_db = np.array(mascota.get("huella", [])).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # EXTRACTOR INDEXADO PLANO SEGURO PROTEGIDO POR EL ESCUDO
-                    porcentaje = float(np.ravel(similitud)) * 100
+                    # EXTRACTOR LINEAL PLANO SEGURO
+                    porcentaje = float(np.squeeze(similitud)) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
@@ -118,7 +118,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
 
 st.divider()
 
-# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
+# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA (SANGRIAS REPARADAS AL 100%) ---
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
@@ -161,6 +161,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
+                # SANGRÍAS ALINEADAS MILIMÉTRICAMENTE AL MARGEN DEL IF
                 bd = cargar_base_datos()
                 bd.append({
                     "tipo_alerta": str(tipo_alerta),
