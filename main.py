@@ -68,16 +68,21 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
                 
+                # Recorremos toda la red y guardamos todos los que se parezcan
                 for mascota in bd:
                     huella_db = np.array(mascota["huella"]).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
-                    porcentaje = float(np.ravel(similitud)) * 100
                     
+                    # CORRECCIÓN MAESTRA DEFINITIVA: Posicionamiento indexado forzado para pulverizar el TypeError
+                    porcentaje = float(similitud[0][0]) * 100
+                    
+                    # Si supera el umbral del 65%, entra al ranking de sospechosos
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
                         coincidencias_encontradas.append(mascota_con_score)
                 
+                # Ordenamos el ranking en vivo de mayor a menor parecido
                 coincidencias_encontradas = sorted(coincidencias_encontradas, key=lambda x: x["porcentaje_match"], reverse=True)
                 
                 if not coincidencias_encontradas:
@@ -85,6 +90,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                 else:
                     st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias en la red nacional!")
                     
+                    # Dibujamos en pantalla una placa para cada perro similar encontrado
                     for idx, coincidencia in enumerate(coincidencias_encontradas):
                         porcentaje_actual = coincidencia["porcentaje_match"]
                         
@@ -184,12 +190,5 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA REPARADA: DESACTIVACIÓN UNIVERSAL SÓLO POR NÚMERO DE TELÉFONO ---
+# --- 3️⃣ SECCIÓN DE BAJA DESACTIVACIÓN UNIVERSAL SÓLO POR NÚMERO DE TELÉFONO ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
-st.write("Si el perro ya regresó con su familia o el dueño apareció, ingresá tu número de teléfono de registro para remover tus publicaciones de la red nacional.")
-
-baja_telefono = st.text_input("Ingresá el teléfono celular con el que publicaste (Ej: 1162330944)", key="baja_tel_unico")
-
-if st.button("Desactivar Mis Alertas Permanentemente", key="btn_baja_sistema_unico"):
-    if baja_telefono:
-        tel_baja_limpio = "".join(filter(str.isdigit, baja_telefono))
