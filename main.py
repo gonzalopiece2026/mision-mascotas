@@ -192,3 +192,24 @@ st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
 baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_final_ar")
+
+if st.button("Eliminar Mis Publicaciones", key="btn_baja_principal"):
+    num_baja_limpio = "".join(filter(str.isdigit, baja_telefono_fijo_ok))
+    
+    if not num_baja_limpio:
+        st.warning("⚠️ Por favor, ingresá un número de teléfono válido.")
+    else:
+        bd = cargar_base_datos()
+        if not bd:
+            st.info("ℹ️ La base de datos está vacía.")
+        else:
+            # Filtramos la base de datos dejando solo los que NO coincidan con este teléfono
+            nueva_bd = [mascota for mascota in bd if mascota.get("contacto") != num_baja_limpio]
+            
+            # Verificamos si se borró algo
+            if len(nueva_bd) < len(bd):
+                guardar_base_datos(nueva_bd)
+                st.success(f"✅ ¡Listo! Se eliminaron correctamente las publicaciones asociadas al número {num_baja_limpio}.")
+                st.rerun()
+            else:
+                st.error("❌ No se encontró ninguna publicación activa con ese número de teléfono.")
