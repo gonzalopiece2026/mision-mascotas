@@ -45,10 +45,11 @@ def extraer_huella_segura(img_bgr):
         print(f"Error interno en matriz visual: {e}")
     return None
 
-# --- 1️⃣ SECCIÓN DE BÚSQUEDA INTELIGENTE ---
-st.header("🔎 Buscar Coincidencias Visuales")
-st.write("Subí la foto de un perro para contrastarlo de forma instantánea con toda la red nacional.")
+# --- 1️⃣ SECCIÓN DE BÚSQUEDA INTELIGENTE CON FILTRO GEOGRÁFICO ---
+st.header("🔎 Buscar Coincidencias Visuales y por Zona")
+st.write("Subí la foto de un perro e indicá la zona para priorizar los resultados locales.")
 img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
+zona_busqueda_input = st.text_input("Zona, Barrio o Provincia donde buscás (Ej: Moreno, Mendoza)", key="bus_zona")
 
 if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
@@ -69,31 +70,44 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
             else:
                 coincidencias_encontradas = []
                 vector_u = np.array(huella_usuario).reshape(1, -1)
+                zona_usuario = zona_busqueda_input.strip().lower()
                 
                 for mascota in bd:
                     huella_db = np.array(mascota.get("huella", [])).reshape(1, -1)
                     similitud = cosine_similarity(vector_u, huella_db)
                     
-                    # EXTRACTOR INDEXADO PLANO PROTEGIDO POR EL ESCUDO SUPERIOR
                     porcentaje = float(np.squeeze(similitud)) * 100
                     
                     if porcentaje >= 65:
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
+                        
+                        # FILTRO E ETIQUETADO INTELIGENTE DE ZONA
+                        zona_mascota = mascota.get("zona", "").lower()
+                        if zona_usuario and (zona_usuario in zona_mascota or zona_mascota in zona_usuario):
+                            mascota_con_score["etiqueta_zona"] = "📍 ¡Misma Zona / Coincidencia Geográfica!"
+                            mascota_con_score["porcentaje_match"] += 15  # Le damos prioridad visual en el orden
+                        else:
+                            mascota_con_score["etiqueta_zona"] = "🌍 Otra Zona / Provincia"
+                            
                         coincidencias_encontradas.append(mascota_con_score)
                 
+                # Ordenamos primero por el score recalculado (priorizando los de la misma zona)
                 coincidencias_encontradas = sorted(coincidencias_encontradas, key=lambda x: x["porcentaje_match"], reverse=True)
                 
                 if not coincidencias_encontradas:
                     st.error("❌ No se encontraron coincidencias similares en el sistema.")
                 else:
-                    st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias en la red nacional!")
+                    st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias!")
                     
                     for idx, coincidencia in enumerate(coincidencias_encontradas):
-                        porcentaje_actual = coincidencia["porcentaje_match"]
+                        porcentaje_visual = coincidencia["porcentaje_match"]
+                        if "📍" in coincidencia.get("etiqueta_zona", ""):
+                            porcentaje_visual -= 15  # Mostramos el porcentaje real de la foto
                         
                         with st.container(border=True):
-                            st.markdown(f"### 🎯 Opción #{idx + 1} - Coincidencia del {porcentaje_actual:.2f}%")
+                            st.markdown(f"### 🎯 Opción #{idx + 1} - Similitud Visual: {porcentaje_visual:.2f}%")
+                            st.markdown(f"**{coincidencia.get('etiqueta_zona', '')}**")
                             
                             tipo_match = coincidencia.get('tipo_alerta', 'Perdido')
                             cartel_tipo = "🔴 ESTADO: PERDIDO" if tipo_match == "Perdido" else "🟢 ESTADO: ENCONTRADO"
@@ -132,7 +146,7 @@ detalles_perro = st.text_area("Detalles particulares (Ej: Tiene collar rojo, ren
 st.write("---")
 st.write("📋 Datos del Responsable:")
 nombre_rescatista = st.text_input("Nombre del Dueño / Rescatista")
-lugar_hecho = st.text_input("¿Dónde ocurrió? (Ej: Barrio Satélite, Moreno)")
+lugar_hecho = st.text_input("¿Dónde ocurrió? (Ej: Barrio Satélite, Moreno)", key="casillero_lugar_hecho_zona")
 fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
 telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)", key="casillero_registro_telefono_moreno_puro")
 
@@ -203,10 +217,8 @@ if st.button("Eliminar Mis Publicaciones", key="btn_baja_principal"):
         if not bd:
             st.info("ℹ️ La base de datos está vacía.")
         else:
-            # Filtramos la base de datos dejando solo los que NO coincidan con este teléfono
             nueva_bd = [mascota for mascota in bd if mascota.get("contacto") != num_baja_limpio]
             
-            # Verificamos si se borró algo
             if len(nueva_bd) < len(bd):
                 guardar_base_datos(nueva_bd)
                 st.success(f"✅ ¡Listo! Se eliminaron correctamente las publicaciones asociadas al número {num_baja_limpio}.")
