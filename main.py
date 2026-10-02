@@ -45,11 +45,12 @@ def extraer_huella_segura(img_bgr):
         print(f"Error interno en matriz visual: {e}")
     return None
 
-# --- 1️⃣ SECCIÓN DE BÚSQUEDA INTELIGENTE CON FILTRO GEOGRÁFICO ---
-st.header("🔎 Buscar Coincidencias Visuales y por Zona")
-st.write("Subí la foto de un perro e indicá la zona para priorizar los resultados locales.")
+# --- 1️⃣ SECCIÓN DE BÚSQUEDA INTELIGENTE CON FILTROS (IA + ZONA + SEXO) ---
+st.header("🔎 Buscar Coincidencias Inteligentes")
+st.write("Subí la foto, indicá la zona y el sexo para afinar el cruce de datos.")
 img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
 zona_busqueda_input = st.text_input("Zona, Barrio o Provincia donde buscás (Ej: Moreno, Mendoza)", key="bus_zona")
+sexo_busqueda_input = st.selectbox("Sexo del perro que buscás", ["Cualquiera / No sé", "Macho", "Hembra"], key="bus_sexo")
 
 if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
@@ -82,17 +83,26 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
                         
-                        # FILTRO E ETIQUETADO INTELIGENTE DE ZONA
+                        # 1. FILTRO DE ZONA (Suma puntos si coincide)
                         zona_mascota = mascota.get("zona", "").lower()
+                        etiqueta_z = "🌍 Otra Zona / Provincia"
                         if zona_usuario and (zona_usuario in zona_mascota or zona_mascota in zona_usuario):
-                            mascota_con_score["etiqueta_zona"] = "📍 ¡Misma Zona / Coincidencia Geográfica!"
-                            mascota_con_score["porcentaje_match"] += 15  # Le damos prioridad visual en el orden
-                        else:
-                            mascota_con_score["etiqueta_zona"] = "🌍 Otra Zona / Provincia"
-                            
+                            etiqueta_z = "📍 ¡Misma Zona!"
+                            mascota_con_score["porcentaje_match"] += 12
+                        
+                        # 2. FILTRO DE SEXO (Suma puntos si coincide, resta si es opuesto para separarlos)
+                        sexo_mascota = mascota.get("sexo", "No especificado")
+                        etiqueta_s = ""
+                        if sexo_busqueda_input != "Cualquiera / No sé":
+                            if sexo_mascota == sexo_busqueda_input:
+                                etiqueta_s = f" | ⚧ Coincide sexo ({sexo_busqueda_input})"
+                                mascota_con_score["porcentaje_match"] += 10
+                            elif sexo_mascota != "No especificado":
+                                mascota_con_score["porcentaje_match"] -= 8 # Penaliza levemente si es el sexo opuesto
+                        
+                        mascota_con_score["etiqueta_zona"] = f"{etiqueta_z}{etiqueta_s}"
                         coincidencias_encontradas.append(mascota_con_score)
                 
-                # Ordenamos primero por el score recalculado (priorizando los de la misma zona)
                 coincidencias_encontradas = sorted(coincidencias_encontradas, key=lambda x: x["porcentaje_match"], reverse=True)
                 
                 if not coincidencias_encontradas:
@@ -101,9 +111,14 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias!")
                     
                     for idx, coincidencia in enumerate(coincidencias_encontradas):
+                        # Calculamos un valor visual limpio para mostrar
                         porcentaje_visual = coincidencia["porcentaje_match"]
                         if "📍" in coincidencia.get("etiqueta_zona", ""):
-                            porcentaje_visual -= 15  # Mostramos el porcentaje real de la foto
+                            porcentaje_visual -= 12
+                        if "Coincide sexo" in coincidencia.get("etiqueta_zona", ""):
+                            porcentaje_visual -= 10
+                        elif porcentaje_visual < 65:
+                            porcentaje_visual = 65.0 # Mínimo base
                         
                         with st.container(border=True):
                             st.markdown(f"### 🎯 Opción #{idx + 1} - Similitud Visual: {porcentaje_visual:.2f}%")
@@ -113,7 +128,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                             cartel_tipo = "🔴 ESTADO: PERDIDO" if tipo_match == "Perdido" else "🟢 ESTADO: ENCONTRADO"
                             st.write(cartel_tipo)
                             
-                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')}")
+                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n⚧ **Sexo:** {coincidencia.get('sexo', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')}")
                             
                             numero_match = coincidencia.get('contacto', '')
                             st.markdown("**📱 Teléfono de Contacto:**")
@@ -139,6 +154,7 @@ st.write("Subí la foto y detallá las características del animal para agilizar
 tipo_alerta = st.selectbox("¿Qué tipo de alerta querés crear?", ["Perdido", "Encontrado"])
 img_file = st.file_uploader("Subí la foto de la mascota", type=["jpg", "jpeg", "png", "webp"], key="reg_img")
 nombre_perro = st.text_input("Nombre de la mascota (Si no lo sabés, poné 'No lo sé')")
+sexo_perro = st.selectbox("Sexo de la mascota", ["Macho", "Hembra", "No especificado"], key="reg_sexo")
 raza_perro = st.text_input("Raza (Ej: Cruza, Caniche, Ovejero)")
 color_perro = st.text_input("Color principal del pelaje")
 detalles_perro = st.text_area("Detalles particulares (Ej: Tiene collar rojo, renguea de una pata, es asustadizo)")
@@ -184,6 +200,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 bd.append({
                     "tipo_alerta": str(tipo_alerta),
                     "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
+                    "sexo": str(sexo_perro),
                     "raza": str(raza_perro) if raza_perro else "No específica",
                     "color": str(color_perro) if color_perro else "No especificado",
                     "detalles": str(detalles_perro) if detalles_perro else "Sin detalles",
@@ -215,7 +232,7 @@ if st.button("Eliminar Mis Publicaciones", key="btn_baja_principal"):
     else:
         bd = cargar_base_datos()
         if not bd:
-            st.info("ℹ️ La base de datos está vacía.")
+            st.info("ℹ️️ La base de datos está vacía.")
         else:
             nueva_bd = [mascota for mascota in bd if mascota.get("contacto") != num_baja_limpio]
             
