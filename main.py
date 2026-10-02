@@ -137,8 +137,13 @@ fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
 telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)", key="casillero_registro_telefono_moreno_puro")
 
 if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
-    if img_file and nombre_rescatista and lugar_hecho and telefono_contacto:
-        num_limpio = "".join(filter(str.isdigit, telefono_contacto))
+    num_limpio = "".join(filter(str.isdigit, telefono_contacto))
+    
+    if not img_file or not nombre_rescatista or not lugar_hecho or not telefono_contacto:
+        st.warning("⚠️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
+    elif len(num_limpio) < 10 or len(num_limpio) > 13:
+        st.error("❌ El número de teléfono ingresado no parece válido. Asegurate de incluir la característica (Ej: 11 para Buenos Aires/Moreno) y que tenga al menos 10 dígitos.")
+    else:
         bytes_datos_foto = img_file.getvalue()
         file_bytes = np.asarray(bytearray(bytes_datos_foto), dtype=np.uint8)
         img_bgr = cv2.imdecode(file_bytes, 1)
@@ -177,10 +182,8 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "fecha_subida": str(fecha_subida_str)
                 })
                 guardar_base_datos(bd)
-                st.success(f"✅ ¡Éxito total! Alerta guardada con éxito en la red nacional.")
+                st.success("✅ ¡Éxito total! Alerta guardada con éxito en la red nacional.")
                 st.rerun()
-    else:
-        st.warning("⚠️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
 
 st.divider()
 
@@ -189,4 +192,3 @@ st.header("✨ Misión Cumplida: Dar de Baja Alerta")
 st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
 
 baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_final_ar")
-
