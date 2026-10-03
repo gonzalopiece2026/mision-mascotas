@@ -9,6 +9,10 @@ import streamlit as st
 import requests
 from sklearn.metrics.pairwise import cosine_similarity
 
+# --- FUNCIÓN AUXILIAR PARA FECHA Y HORA OFICIAL ARGENTINA (UTC-3) ---
+def obtener_ahora_argentina():
+    return datetime.utcnow() - timedelta(hours=3)
+
 # --- CONFIGURACIÓN DE LA PÁGINA WEB ---
 st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_icon="🐶", layout="centered")
 
@@ -91,7 +95,7 @@ with tab_alertas:
     with col_filtro1:
         zona_filtro_inicio = st.text_input("📍 Filtrar por Zona / Partido / Provincia", value="Moreno", key="mural_filtro_zona")
     with col_filtro2:
-        fecha_desde_filtro = st.date_input("📅 Mostrar alertas OCURRIDAS desde el día:", value=datetime.now() - timedelta(days=30), key="mural_filtro_fecha")
+        fecha_desde_filtro = st.date_input("📅 Mostrar alertas OCURRIDAS desde el día:", value=obtener_ahora_argentina().date() - timedelta(days=30), key="mural_filtro_fecha")
 
     if not bd_actual:
         st.info("📭 No hay alertas activas registradas en el sistema.")
@@ -224,7 +228,7 @@ with tab_alertas:
     detalles_perro = st.text_area("Detalles particulares")
     nombre_rescatista = st.text_input("Nombre del Dueño / Rescatista")
     lugar_hecho = st.text_input("¿Dónde ocurrió? (Ej: Moreno)", key="casillero_lugar_hecho_zona")
-    fecha_suceso = st.date_input("¿Qué día ocurrió?", value=datetime.now())
+    fecha_suceso = st.date_input("¿Qué día ocurrió?", value=obtener_ahora_argentina().date())
     telefono_contacto = st.text_input("Teléfono de Contacto (Ej: 1162330944)", key="casillero_registro_telefono")
 
     if st.button("Guardar Alerta en la Red", key="btn_guardar_principal"):
@@ -254,7 +258,7 @@ with tab_alertas:
                 "ruta_imagen": str(foto_b64_string),
                 "huella": huella,
                 "fecha_hecho": fecha_suceso.strftime("%d/%m/%Y"),
-                "fecha_subida": (datetime.now() - timedelta(hours=3)).strftime("%d/%m/%Y a las %H:%M hs")
+                "fecha_subida": obtener_ahora_argentina().strftime("%d/%m/%Y a las %H:%M hs")
             })
             guardar_base_datos(bd, ARCHIVO_BD)
             st.success("✅ Alerta guardada con éxito.")
@@ -335,7 +339,7 @@ with tab_adopciones:
                 "zona": str(zona_adp),
                 "contacto": str(num_limpio),
                 "ruta_imagen": str(foto_b64),
-                "fecha_publicacion": (datetime.now() - timedelta(hours=3)).strftime("%d/%m/%Y")
+                "fecha_publicacion": obtener_ahora_argentina().strftime("%d/%m/%Y")
             })
             guardar_base_datos(bd_adp, ARCHIVO_ADOPCIONES)
             st.success("✅ ¡Publicación de adopción creada con éxito!")
@@ -367,7 +371,7 @@ with tab_reencuentros:
                 if len(mascotas_a_borrar) > 0:
                     historial = cargar_base_datos(ARCHIVO_HISTORIAL)
                     for mascota in mascotas_a_borrar:
-                        mascota["fecha_reencuentro"] = datetime.now().strftime("%d/%m/%Y")
+                        mascota["fecha_reencuentro"] = obtener_ahora_argentina().strftime("%d/%m/%Y")
                         historial.append(mascota)
                     
                     guardar_base_datos(nueva_bd, ARCHIVO_BD)
