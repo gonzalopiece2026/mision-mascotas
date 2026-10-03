@@ -82,11 +82,8 @@ else:
     else:
         st.success(f"📍 Mostrando {len(alertas_filtradas_zona)} alerta(s) activa(s) en la zona: **{zona_filtro_inicio}**")
         
-        # Mostramos las últimas de esa zona en formato de tarjetas limpias
-        for mascota in reversed(alertas_filtradas_zona[-4[] if len(alertas_filtradas_zona)>=4 else len(alertas_filtradas_zona):]):
-            pass # Truco interno para asegurar el ciclo de las últimas
-            
-        for mascota in reversed(alertas_filtradas_zona[-3:]): # Mostramos las 3 más recientes de esa zona
+        # Mostramos las últimas 4 alertas de esa zona (de la más reciente a la más antigua)
+        for mascota in reversed(alertas_filtradas_zona[-4:]):
             with st.container(border=True):
                 tipo_alerta_mural = mascota.get('tipo_alerta', 'Perdido')
                 badge_mural = "🔴 PERDIDO" if tipo_alerta_mural == "Perdido" else "🟢 ENCONTRADO"
@@ -231,7 +228,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     num_limpio = "".join(filter(str.isdigit, telefono_contacto))
     
     if not img_file or not nombre_rescatista or not lugar_hecho or not telefono_contacto:
-        st.warning("⚠️️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
+        st.warning("⚠ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
     elif len(num_limpio) < 10 or len(num_limpio) > 13:
         st.error("❌ El número de teléfono ingresado no parece válido. Asegurate de incluir la característica (Ej: 11 para Buenos Aires/Moreno) y que tenga al menos 10 dígitos.")
     else:
