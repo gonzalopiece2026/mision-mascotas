@@ -58,6 +58,15 @@ with col2:
 
 st.divider()
 
+# --- 💡 CONSEJOS ÚTILES PARA LA COMUNIDAD ---
+with st.expander("💡 Consejos útiles si perdiste o encontraste una mascota"):
+    st.markdown("""
+    * 💧 **Si encontraste un perro:** Dejale agua fresca, resguardalo en un lugar seguro y sacale una foto clara de frente con buena iluminación para subirla a la red.
+    * 🏥 **Si se te perdió:** Avisá a las veterinarias y refugios de tu zona, pegá carteles en comercios cercanos y mantené activa la alerta acá en **Misión Mascotas**.
+    """)
+
+st.divider()
+
 # --- 🚨 MURAL EN VIVO FILTRADO POR ZONA Y FECHA (EN EL INICIO) ---
 st.header("📢 Alertas Activas en tu Zona")
 st.write("Visualizá los perros reportados en tu localidad filtrando por zona y fecha del suceso.")
@@ -66,7 +75,6 @@ col_filtro1, col_filtro2 = st.columns(2)
 with col_filtro1:
     zona_filtro_inicio = st.text_input("📍 Filtrar por Zona / Partido / Provincia", value="Moreno", key="mural_filtro_zona")
 with col_filtro2:
-    # Filtro de fecha para no ver reportes viejos que no correspondan
     fecha_desde_filtro = st.date_input("📅 Mostrar alertas OCURRIDAS desde el día:", value=datetime.now() - timedelta(days=30), key="mural_filtro_fecha")
 
 if not bd_actual:
@@ -75,13 +83,11 @@ else:
     zona_buscada_limpia = zona_filtro_inicio.strip().lower()
     fecha_filtro_dt = fecha_desde_filtro
     
-    # Filtramos la base de datos según zona y fecha desde la que ocurrió el hecho
     alertas_filtradas_zona = []
     for m in bd_actual:
         zona_mascota = m.get("zona", "").lower()
         fecha_str = m.get("fecha_hecho", "")
         
-        # Parse de fecha del suceso para comparar
         cumple_fecha = True
         if fecha_str:
             try:
@@ -89,7 +95,7 @@ else:
                 if fecha_mascota_dt < fecha_filtro_dt:
                     cumple_fecha = False
             except:
-                pass # Si no se puede parsear, se incluye por seguridad
+                pass
 
         cumple_zona = not zona_buscada_limpia or zona_buscada_limpia in zona_mascota or zona_mascota in zona_buscada_limpia
         
@@ -101,7 +107,6 @@ else:
     else:
         st.success(f"📍 Mostrando {len(alertas_filtradas_zona)} alerta(s) activa(s) en la zona: **{zona_filtro_inicio}** (ocurridas desde el {fecha_desde_filtro.strftime('%d/%m/%Y')})")
         
-        # Mostramos las últimas de esa zona
         for mascota in reversed(alertas_filtradas_zona[-4:]):
             with st.container(border=True):
                 tipo_alerta_mural = mascota.get('tipo_alerta', 'Perdido')
@@ -110,7 +115,6 @@ else:
                 
                 st.markdown(f"### {badge_mural} - 🐾 {nombre_mural} ({mascota.get('sexo', '')})")
                 
-                # Fechas claras: Ocurrió vs Publicado
                 fecha_hecho_ver = mascota.get('fecha_hecho', 'No especificada')
                 fecha_subida_ver = mascota.get('fecha_subida', 'Recientemente')
                 
@@ -190,14 +194,12 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
                         
-                        # 1. FILTRO DE ZONA
                         zona_mascota = mascota.get("zona", "").lower()
                         etiqueta_z = "🌍 Otra Zona / Provincia"
                         if zona_usuario and (zona_usuario in zona_mascota or zona_mascota in zona_usuario):
                             etiqueta_z = "📍 ¡Misma Zona!"
                             mascota_con_score["porcentaje_match"] += 12
                         
-                        # 2. FILTRO DE SEXO
                         sexo_mascota = mascota.get("sexo", "No especificado")
                         etiqueta_s = ""
                         if sexo_busqueda_input != "Cualquiera / No sé":
@@ -358,7 +360,7 @@ if st.button("Eliminar y Registrar Reencuentro", key="btn_baja_principal"):
     num_baja_limpio = "".join(filter(str.isdigit, baja_telefono_fijo_ok))
     
     if not num_baja_limpio:
-        st.warning("⚠️️ Por favor, ingresá un número de teléfono válido.")
+        st.warning("⚠️ Por favor, ingresá un número de teléfono válido.")
     else:
         bd = cargar_base_datos(ARCHIVO_BD)
         if not bd:
