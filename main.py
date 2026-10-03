@@ -16,10 +16,11 @@ st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
 
 ARCHIVO_BD = "base_datos_mascotas.json"
+ARCHIVO_HISTORIAL = "base_datos_reencuentros.json"
 
-def cargar_base_datos():
-    if os.path.exists(ARCHIVO_BD):
-        with open(ARCHIVO_BD, "r", encoding="utf-8") as f:
+def cargar_base_datos(archivo):
+    if os.path.exists(archivo):
+        with open(archivo, "r", encoding="utf-8") as f:
             try:
                 contenido = f.read().strip()
                 if not contenido or contenido == "[]":
@@ -30,8 +31,8 @@ def cargar_base_datos():
                 return []
     return []
 
-def guardar_base_datos(datos):
-    with open(ARCHIVO_BD, "w", encoding="utf-8") as f:
+def guardar_base_datos(datos, archivo):
+    with open(archivo, "w", encoding="utf-8") as f:
         json.dump(datos, f, ensure_ascii=False, indent=4)
 
 # MOTOR DE EXTRACCIÓN VISUAL EN MATRIZ NATIVA (INFALIBLE)
@@ -45,6 +46,18 @@ def extraer_huella_segura(img_bgr):
         print(f"Error interno en matriz visual: {e}")
     return None
 
+# --- 📊 SECCIÓN DE CONTADORES Y MÉTRICAS EN TIEMPO REAL ---
+bd_actual = cargar_base_datos(ARCHIVO_BD)
+bd_reencuentros = cargar_base_datos(ARCHIVO_HISTORIAL)
+
+col1, col2 = st.metrics if hasattr(st, "metrics") else st.columns(2)
+with col1:
+    st.metric(label="🚨 Alertas Activas en la Red", value=len(bd_actual))
+with col2:
+    st.metric(label="❤️ Perros que Volvieron a Casa", value=len(bd_reencuentros))
+
+st.divider()
+
 # --- 1️⃣ SECCIÓN DE BÚSQUEDA INTELIGENTE CON FILTROS (IA + ZONA + SEXO) ---
 st.header("🔎 Buscar Coincidencias Inteligentes")
 st.write("Subí la foto, indicá la zona y el sexo para afinar el cruce de datos.")
@@ -54,7 +67,7 @@ sexo_busqueda_input = st.selectbox("Sexo del perro que buscás", ["Cualquiera / 
 
 if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
-        bd = cargar_base_datos()
+        bd = bd_actual
         
         # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES ROJOS / ROSAS
         if not bd or len(bd) == 0:
@@ -83,14 +96,14 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
                         
-                        # 1. FILTRO DE ZONA (Suma puntos si coincide)
+                        # 1. FILTRO DE ZONA
                         zona_mascota = mascota.get("zona", "").lower()
                         etiqueta_z = "🌍 Otra Zona / Provincia"
                         if zona_usuario and (zona_usuario in zona_mascota or zona_mascota in zona_usuario):
                             etiqueta_z = "📍 ¡Misma Zona!"
                             mascota_con_score["porcentaje_match"] += 12
                         
-                        # 2. FILTRO DE SEXO (Suma puntos si coincide, resta si es opuesto para separarlos)
+                        # 2. FILTRO DE SEXO
                         sexo_mascota = mascota.get("sexo", "No especificado")
                         etiqueta_s = ""
                         if sexo_busqueda_input != "Cualquiera / No sé":
@@ -98,7 +111,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                                 etiqueta_s = f" | ⚧ Coincide sexo ({sexo_busqueda_input})"
                                 mascota_con_score["porcentaje_match"] += 10
                             elif sexo_mascota != "No especificado":
-                                mascota_con_score["porcentaje_match"] -= 8 # Penaliza levemente si es el sexo opuesto
+                                mascota_con_score["porcentaje_match"] -= 8
                         
                         mascota_con_score["etiqueta_zona"] = f"{etiqueta_z}{etiqueta_s}"
                         coincidencias_encontradas.append(mascota_con_score)
@@ -111,14 +124,13 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                     st.success(f"📊 ¡Se encontraron {len(coincidencias_encontradas)} posibles coincidencias!")
                     
                     for idx, coincidencia in enumerate(coincidencias_encontradas):
-                        # Calculamos un valor visual limpio para mostrar
                         porcentaje_visual = coincidencia["porcentaje_match"]
                         if "📍" in coincidencia.get("etiqueta_zona", ""):
                             porcentaje_visual -= 12
                         if "Coincide sexo" in coincidencia.get("etiqueta_zona", ""):
                             porcentaje_visual -= 10
                         elif porcentaje_visual < 65:
-                            porcentaje_visual = 65.0 # Mínimo base
+                            porcentaje_visual = 65.0
                         
                         with st.container(border=True):
                             st.markdown(f"### 🎯 Opción #{idx + 1} - Similitud Visual: {porcentaje_visual:.2f}%")
@@ -147,7 +159,7 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
 
 st.divider()
 
-# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA (ESTABLE E INDESTRUCTIBLE) ---
+# --- 2️⃣ SECCIÓN DE REGISTRO DE ALERTA ---
 st.header("📝 Registrar Alerta de Mascota")
 st.write("Subí la foto y detallá las características del animal para agilizar el cruce inteligente.")
 
@@ -196,7 +208,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                 hora_argentina = datetime.now() - timedelta(hours=3)
                 fecha_subida_str = hora_argentina.strftime("%d/%m/%Y a las %H:%M hs")
                 
-                bd = cargar_base_datos()
+                bd = cargar_base_datos(ARCHIVO_BD)
                 bd.append({
                     "tipo_alerta": str(tipo_alerta),
                     "nombre_perro": str(nombre_perro).strip() if nombre_perro else "No especificado",
@@ -212,33 +224,64 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
                     "fecha_hecho": str(fecha_hecho_str),
                     "fecha_subida": str(fecha_subida_str)
                 })
-                guardar_base_datos(bd)
+                guardar_base_datos(bd, ARCHIVO_BD)
                 st.success("✅ ¡Éxito total! Alerta guardada con éxito en la red nacional.")
                 st.rerun()
 
 st.divider()
 
-# --- 3️⃣ SECCIÓN DE BAJA INDESTRUCTIBLE UBICADA FIJA ABAJO DE TODO ---
+# --- 3️⃣ SECCIÓN DE BAJA Y REENCUENTROS ---
 st.header("✨ Misión Cumplida: Dar de Baja Alerta")
-st.write("Si el perro ya regresó con su familia o apareció el dueño, ingresá tu número de teléfono celular para remover las publicaciones de la nube.")
+st.write("Si el perro ya regresó con su familia, ingresá tu número para darlo de baja y sumar un reencuentro exitoso al contador.")
 
 baja_telefono_fijo_ok = st.text_input("Ingresá el número de teléfono con el que publicaste el reporte (Ej: 1162330944)", key="casillero_baja_universal_fijo_moreno_2026_final_ar")
 
-if st.button("Eliminar Mis Publicaciones", key="btn_baja_principal"):
+if st.button("Eliminar y Registrar Reencuentro", key="btn_baja_principal"):
     num_baja_limpio = "".join(filter(str.isdigit, baja_telefono_fijo_ok))
     
     if not num_baja_limpio:
         st.warning("⚠️ Por favor, ingresá un número de teléfono válido.")
     else:
-        bd = cargar_base_datos()
+        bd = cargar_base_datos(ARCHIVO_BD)
         if not bd:
-            st.info("ℹ️️ La base de datos está vacía.")
+            st.info("ℹ️ La base de datos está vacía.")
         else:
-            nueva_bd = [mascota for mascota in bd if mascota.get("contacto") != num_baja_limpio]
+            # Separamos las mascotas que coinciden con este teléfono
+            mascotas_a_borrar = [m for m in bd if m.get("contacto") == num_baja_limpio]
+            nueva_bd = [m for m in bd if m.get("contacto") != num_baja_limpio]
             
-            if len(nueva_bd) < len(bd):
-                guardar_base_datos(nueva_bd)
-                st.success(f"✅ ¡Listo! Se eliminaron correctamente las publicaciones asociadas al número {num_baja_limpio}.")
+            if len(mascotas_a_borrar) > 0:
+                # Guardamos las mascotas en el archivo de historial (reencuentros)
+                historial = cargar_base_datos(ARCHIVO_HISTORIAL)
+                for mascota in mascotas_a_borrar:
+                    mascota["fecha_reencuentro"] = datetime.now().strftime("%d/%m/%Y")
+                    historial.append(mascota)
+                
+                guardar_base_datos(nueva_bd, ARCHIVO_BD)
+                guardar_base_datos(historial, ARCHIVO_HISTORIAL)
+                
+                st.success(f"❤️ ¡Misión cumplida! Se registró el reencuentro con éxito. ¡Gracias por usar Misión Mascotas!")
                 st.rerun()
             else:
                 st.error("❌ No se encontró ninguna publicación activa con ese número de teléfono.")
+
+# --- 💖 APARTADO VISUAL DE PERROS QUE YA VOLVIERON A CASA ---
+st.divider()
+st.header("❤️ Muro de Reencuentros Felices")
+st.write("Estos son algunos de los perritos que ya volvieron con sus familias gracias a la red.")
+
+if not bd_reencuentros:
+    st.info("📌 Todavía no hay reencuentros registrados. ¡Cuando des de baja una alerta exitosa, aparecerá acá para celebrar!")
+else:
+    for idx, reencuentro in enumerate(bd_reencuentros[::-1]): # Mostramos los más recientes primero
+        with st.container(border=True):
+            st.markdown(f"### 🎉 ¡Reencuentro Exitoso #{len(bd_reencuentros) - idx}!")
+            st.success(f"🐾 **Mascota:** {reencuentro.get('nombre_perro', 'Desconocido')} ({reencuentro.get('sexo', '')}) \n📍 **Zona:** {reencuentro.get('zona', 'No especificada')} \n📅 **Volvió a casa el:** {reencuentro.get('fecha_reencuentro', 'Reciente')}")
+            
+            foto_b64 = reencuentro.get('ruta_imagen', '')
+            if foto_b64 and foto_b64 != "error":
+                try:
+                    bytes_decor = base64.b64decode(foto_b64)
+                    st.image(bytes_decor, use_container_width=True)
+                except:
+                    pass
