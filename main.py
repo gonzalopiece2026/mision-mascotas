@@ -10,7 +10,81 @@ import requests
 from sklearn.metrics.pairwise import cosine_similarity
 
 # --- CONFIGURACIÓN DE LA PÁGINA WEB ---
-st.set_page_config(page_title="Misión Mascotas - Red Nacional con IA", page_icon="🐶", layout="centered")
+st.set_page_config(
+    page_title="Misión Mascotas - Red Nacional con IA", 
+    page_icon="🐶", 
+    layout="centered"
+)
+
+# --- 🎨 INYECCIÓN DE ESTILOS CSS PERSONALIZADOS ---
+st.markdown("""
+    <style>
+    /* Fondo general suave */
+    .stApp {
+        background-color: #f8f9fa;
+    }
+    
+    /* Estilo de los títulos */
+    h1 {
+        color: #1E1E2E;
+        font-weight: 800;
+    }
+    h2, h3 {
+        color: #2D1B69;
+    }
+
+    /* Tarjetas personalizadas con sombra */
+    div[data-testid="stVerticalBlock"] > div[style*="border"] {
+        border-radius: 12px !important;
+        border: 1px solid #e0e0e0 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+        background-color: #ffffff !important;
+        padding: 15px !important;
+    }
+
+    /* Botón verde de WhatsApp con hover */
+    .btn-whatsapp {
+        background-color: #25D366;
+        color: white !important;
+        padding: 12px 20px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        display: block;
+        text-decoration: none !important;
+        box-shadow: 0 3px 6px rgba(37, 211, 102, 0.3);
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .btn-whatsapp:hover {
+        background-color: #1ebd56;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 12px rgba(37, 211, 102, 0.4);
+    }
+
+    /* Badges de estado */
+    .badge-perdido {
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+    }
+    
+    .badge-encontrado {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 st.title("🐶 Misión Mascotas")
 st.write("Plataforma Federal Autónoma: Buscador inteligente por reconocimiento visual con IA para todo el país.")
@@ -62,7 +136,6 @@ st.divider()
 st.header("📢 Alertas Activas en tu Zona")
 st.write("Visualizá los perros reportados en tu localidad para estar alerta en tiempo real.")
 
-# Filtro de zona para el mural de inicio
 zona_filtro_inicio = st.text_input("Filtrar mural por tu Zona / Partido / Provincia (Ej: Moreno)", value="Moreno", key="mural_filtro_zona")
 
 if not bd_actual:
@@ -70,7 +143,6 @@ if not bd_actual:
 else:
     zona_buscada_limpia = zona_filtro_inicio.strip().lower()
     
-    # Filtramos la base de datos según la zona que escribas
     alertas_filtradas_zona = []
     for m in bd_actual:
         zona_mascota = m.get("zona", "").lower()
@@ -82,14 +154,14 @@ else:
     else:
         st.success(f"📍 Mostrando {len(alertas_filtradas_zona)} alerta(s) activa(s) en la zona: **{zona_filtro_inicio}**")
         
-        # Mostramos las últimas 4 alertas de esa zona (de la más reciente a la más antigua)
         for mascota in reversed(alertas_filtradas_zona[-4:]):
             with st.container(border=True):
                 tipo_alerta_mural = mascota.get('tipo_alerta', 'Perdido')
+                clase_badge = "badge-perdido" if tipo_alerta_mural == "Perdido" else "badge-encontrado"
                 badge_mural = "🔴 PERDIDO" if tipo_alerta_mural == "Perdido" else "🟢 ENCONTRADO"
                 nombre_mural = mascota.get('nombre_perro', 'Sin nombre')
                 
-                st.markdown(f"### {badge_mural} - 🐾 {nombre_mural} ({mascota.get('sexo', '')})")
+                st.markdown(f"### <span class='{clase_badge}'>{badge_mural}</span> 🐾 {nombre_mural} ({mascota.get('sexo', '')})", unsafe_allow_html=True)
                 st.info(f"📍 **Zona:** {mascota.get('zona', 'No especificada')} \n📅 **Fecha:** {mascota.get('fecha_hecho', '')} \n🐕 **Raza / Color:** {mascota.get('raza', '')} | {mascota.get('color', '')}")
                 
                 numero_mural = mascota.get('contacto', '')
@@ -102,20 +174,8 @@ else:
                     url_wa = f"https://wa.me/{num_wa}?text={texto_wa}"
                     
                     st.markdown(f'''
-                        <a href="{url_wa}" target="_blank" style="text-decoration: none;">
-                            <div style="
-                                background-color: #25D366;
-                                color: white;
-                                padding: 10px 15px;
-                                border-radius: 8px;
-                                text-align: center;
-                                font-weight: bold;
-                                font-size: 15px;
-                                margin-top: 5px;
-                                margin-bottom: 10px;
-                            ">
-                                💬 Contactar por WhatsApp ({numero_mural})
-                            </div>
+                        <a href="{url_wa}" target="_blank" class="btn-whatsapp">
+                            💬 Contactar por WhatsApp ({numero_mural})
                         </a>
                     ''', unsafe_allow_html=True)
                 
@@ -166,14 +226,12 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                         mascota_con_score = mascota.copy()
                         mascota_con_score["porcentaje_match"] = porcentaje
                         
-                        # 1. FILTRO DE ZONA
                         zona_mascota = mascota.get("zona", "").lower()
                         etiqueta_z = "🌍 Otra Zona / Provincia"
                         if zona_usuario and (zona_usuario in zona_mascota or zona_mascota in zona_usuario):
                             etiqueta_z = "📍 ¡Misma Zona!"
                             mascota_con_score["porcentaje_match"] += 12
                         
-                        # 2. FILTRO DE SEXO
                         sexo_mascota = mascota.get("sexo", "No especificado")
                         etiqueta_s = ""
                         if sexo_busqueda_input != "Cualquiera / No sé":
@@ -207,8 +265,9 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                             st.markdown(f"**{coincidencia.get('etiqueta_zona', '')}**")
                             
                             tipo_match = coincidencia.get('tipo_alerta', 'Perdido')
+                            clase_badge_m = "badge-perdido" if tipo_match == "Perdido" else "badge-encontrado"
                             cartel_tipo = "🔴 ESTADO: PERDIDO" if tipo_match == "Perdido" else "🟢 ESTADO: ENCONTRADO"
-                            st.write(cartel_tipo)
+                            st.markdown(f"<span class='{clase_badge_m}'>{cartel_tipo}</span>", unsafe_allow_html=True)
                             
                             nombre_match = coincidencia.get('nombre_perro', 'No especificado')
                             st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {nombre_match} \n⚧ **Sexo:** {coincidencia.get('sexo', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')}")
@@ -223,20 +282,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                                 url_wa = f"https://wa.me/{num_wa}?text={texto_wa}"
                                 
                                 st.markdown(f'''
-                                    <a href="{url_wa}" target="_blank" style="text-decoration: none;">
-                                        <div style="
-                                            background-color: #25D366;
-                                            color: white;
-                                            padding: 10px 15px;
-                                            border-radius: 8px;
-                                            text-align: center;
-                                            font-weight: bold;
-                                            font-size: 15px;
-                                            margin-top: 5px;
-                                            margin-bottom: 10px;
-                                        ">
-                                            💬 Contactar por WhatsApp ({numero_match})
-                                        </div>
+                                    <a href="{url_wa}" target="_blank" class="btn-whatsapp">
+                                        💬 Contactar por WhatsApp ({numero_match})
                                     </a>
                                 ''', unsafe_allow_html=True)
                             
@@ -370,7 +417,6 @@ else:
             st.markdown(f"### 🎉 ¡Reencuentro Exitoso #{len(bd_reencuentros) - idx}!")
             st.success(f"🐾 **Mascota:** {reencuentro.get('nombre_perro', 'Desconocido')} ({reencuentro.get('sexo', '')}) \n📍 **Zona:** {reencuentro.get('zona', 'No especificada')} \n📅 **Volvió a casa el:** {reencuentro.get('fecha_reencuentro', 'Reciente')}")
             
-            foto_b64 = reencuentro.get('ruta_json', '') # Asegura compatibilidad limpia
             foto_b64 = reencuentro.get('ruta_imagen', '')
             if foto_b64 and foto_b64 != "error":
                 try:
