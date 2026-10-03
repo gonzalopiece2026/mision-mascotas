@@ -78,10 +78,11 @@ with st.expander("💡 Consejos útiles para la comunidad"):
 st.divider()
 
 # --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS (TABS) ---
-tab_alertas, tab_adopciones, tab_reencuentros = st.tabs([
+tab_alertas, tab_adopciones, tab_reencuentros, tab_guia = st.tabs([
     "🚨 Pérdidas y Hallazgos", 
     "🏡 Perros en Adopción", 
-    "✨ Dar de Baja / Reencuentros"
+    "✨ Dar de Baja / Reencuentros",
+    "📖 ¿Cómo usar la app?"
 ])
 
 # =============================================================================
@@ -272,7 +273,6 @@ with tab_adopciones:
     st.header("🏡 Perros en Adopción Responsable")
     st.write("Conocé a los perritos que están buscando un hogar definitivo.")
 
-    # MURAL DE ADOPCIONES
     if not bd_adopciones:
         st.info("📌 Por el momento no hay perritos registrados en adopción. Podés publicar uno abajo.")
     else:
@@ -308,7 +308,6 @@ with tab_adopciones:
 
     st.divider()
 
-    # FORMULARIO PARA PUBLICAR ADOPCIÓN
     st.header("📝 Publicar Mascota en Adopción")
     img_adp = st.file_uploader("Subí la foto del perrito en adopción", type=["jpg", "jpeg", "png", "webp"], key="adp_img")
     nom_adp = st.text_input("Nombre del perro", key="adp_nom")
@@ -400,3 +399,53 @@ with tab_reencuentros:
                         st.image(bytes_decor, use_container_width=True)
                     except:
                         pass
+
+
+# =============================================================================
+# 4️⃣ PESTAÑA: GUÍA FÁCIL PASO A PASO
+# =============================================================================
+with tab_guia:
+    st.header("📖 Guía Fácil: Aprende a usar Misión Mascotas")
+    st.write("Explicación sencilla paso a paso para personas de cualquier edad.")
+
+    with st.expander("🔍 1. ¿Cómo buscar si alguien encontró a tu perro?"):
+        st.markdown("""
+        1. Entrá a la pestaña **🚨 Pérdidas y Hallazgos**.
+        2. Busca la sección **'Buscar Coincidencias Inteligentes con IA'**.
+        3. Tocá el botón **'Browse files'** (o 'Examinar') y seleccioná una foto clara de tu mascota desde la galería de tu celular.
+        4. Escribí tu localidad (ejemplo: *Moreno*) en el casillero de zona.
+        5. Tocá el botón azul **'Buscar Coincidencias con IA'**.
+        6. La Inteligencia Artificial analizará la imagen y te mostrará los perros parecidos registrados en el sistema.
+        """)
+
+    with st.expander("📝 2. ¿Cómo publicar un perro que perdiste o encontraste?"):
+        st.markdown("""
+        1. Entrá a la pestaña **🚨 Pérdidas y Hallazgos**.
+        2. Bajá hasta la sección **'Registrar Alerta de Mascota'**.
+        3. Seleccioná si el perro está **Perdido** o fue **Encontrado**.
+        4. Subí la foto tocando **'Browse files'**.
+        5. Completá tu nombre, tu localidad y tu **teléfono con característica (ej: 1162330944)**.
+        6. Tocá el botón azul **'Guardar Alerta en la Red'**. ¡Listo! Ya aparecerá en el mural para todos los vecinos.
+        """)
+
+    with st.expander("💬 3. ¿Cómo comunicarte directamente con una persona?"):
+        st.markdown("""
+        * En cada publicación del mural vas a ver un botón verde que dice **'💬 Contactar por WhatsApp'**.
+        * Al tocarlo con el dedo, se abrirá automáticamente tu aplicación de WhatsApp con un mensaje ya escrito.
+        * Solo tenés que presionar el botón de enviar en WhatsApp para chatear directamente.
+        """)
+
+    with st.expander("🏡 4. ¿Cómo ver o publicar perros en Adopción?"):
+        st.markdown("""
+        1. Tocá la pestaña **🏡 Perros en Adopción** arriba de todo.
+        2. Podés recorrer las fotos de los perritos que buscan familia.
+        3. Si querés dar en adopción o publicar un tránsito, bajá al formulario de esa misma pestaña, completá los datos y tocá **'Publicar en Adopción'**.
+        """)
+
+    with st.expander("✨ 5. ¿Qué hacer cuando el perro vuelve a su casa?"):
+        st.markdown("""
+        1. Tocá la pestaña **✨ Dar de Baja / Reencuentros**.
+        2. Escribí el número de teléfono con el que hiciste la publicación.
+        3. Tocá el botón **'Eliminar y Registrar Reencuentro'**.
+        4. La alerta se borrará del mural activo y pasará al muro de historias felices para celebrar.
+        """)
