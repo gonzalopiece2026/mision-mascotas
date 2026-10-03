@@ -87,13 +87,37 @@ else:
             with st.container(border=True):
                 tipo_alerta_mural = mascota.get('tipo_alerta', 'Perdido')
                 badge_mural = "🔴 PERDIDO" if tipo_alerta_mural == "Perdido" else "🟢 ENCONTRADO"
+                nombre_mural = mascota.get('nombre_perro', 'Sin nombre')
                 
-                st.markdown(f"### {badge_mural} - 🐾 {mascota.get('nombre_perro', 'Sin nombre')} ({mascota.get('sexo', '')})")
+                st.markdown(f"### {badge_mural} - 🐾 {nombre_mural} ({mascota.get('sexo', '')})")
                 st.info(f"📍 **Zona:** {mascota.get('zona', 'No especificada')} \n📅 **Fecha:** {mascota.get('fecha_hecho', '')} \n🐕 **Raza / Color:** {mascota.get('raza', '')} | {mascota.get('color', '')}")
                 
                 numero_mural = mascota.get('contacto', '')
                 if numero_mural:
-                    st.code(f"📱 Contacto: {numero_mural}", language="text")
+                    num_wa = "".join(filter(str.isdigit, numero_mural))
+                    if num_wa and not num_wa.startswith("54"):
+                        num_wa = "549" + num_wa
+                    
+                    texto_wa = urllib.parse.quote(f"Hola, vi tu reporte en Misión Mascotas sobre {nombre_mural}. ¡Quería comunicarme con vos!")
+                    url_wa = f"https://wa.me/{num_wa}?text={texto_wa}"
+                    
+                    st.markdown(f'''
+                        <a href="{url_wa}" target="_blank" style="text-decoration: none;">
+                            <div style="
+                                background-color: #25D366;
+                                color: white;
+                                padding: 10px 15px;
+                                border-radius: 8px;
+                                text-align: center;
+                                font-weight: bold;
+                                font-size: 15px;
+                                margin-top: 5px;
+                                margin-bottom: 10px;
+                            ">
+                                💬 Contactar por WhatsApp ({numero_mural})
+                            </div>
+                        </a>
+                    ''', unsafe_allow_html=True)
                 
                 foto_b64 = mascota.get('ruta_imagen', '')
                 if foto_b64 and foto_b64 != "error":
@@ -186,11 +210,35 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
                             cartel_tipo = "🔴 ESTADO: PERDIDO" if tipo_match == "Perdido" else "🟢 ESTADO: ENCONTRADO"
                             st.write(cartel_tipo)
                             
-                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {coincidencia.get('nombre_perro', 'No especificado')} \n⚧ **Sexo:** {coincidencia.get('sexo', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')}")
+                            nombre_match = coincidencia.get('nombre_perro', 'No especificado')
+                            st.info(f"👤 **Responsable:** {coincidencia.get('nombre_dueño', 'Anónimo')} \n📍 **Lugar del hecho:** {coincidencia.get('zona', 'No especificado')} \n📅 **Fecha del suceso:** {coincidencia.get('fecha_hecho', 'No especificada')} \n🐾 **Nombre de la mascota:** {nombre_match} \n⚧ **Sexo:** {coincidencia.get('sexo', 'No especificado')} \n🐕 **Raza / Color:** {coincidencia.get('raza', 'No específica')} | {coincidencia.get('color', 'No de pelaje')}")
                             
                             numero_match = coincidencia.get('contacto', '')
-                            st.markdown("**📱 Teléfono de Contacto:**")
-                            st.code(f"{numero_match}", language="text")
+                            if numero_match:
+                                num_wa = "".join(filter(str.isdigit, numero_match))
+                                if num_wa and not num_wa.startswith("54"):
+                                    num_wa = "549" + num_wa
+                                
+                                texto_wa = urllib.parse.quote(f"Hola, vi tu reporte en Misión Mascotas sobre {nombre_match}. ¡Creo que encontré una coincidencia!")
+                                url_wa = f"https://wa.me/{num_wa}?text={texto_wa}"
+                                
+                                st.markdown(f'''
+                                    <a href="{url_wa}" target="_blank" style="text-decoration: none;">
+                                        <div style="
+                                            background-color: #25D366;
+                                            color: white;
+                                            padding: 10px 15px;
+                                            border-radius: 8px;
+                                            text-align: center;
+                                            font-weight: bold;
+                                            font-size: 15px;
+                                            margin-top: 5px;
+                                            margin-bottom: 10px;
+                                        ">
+                                            💬 Contactar por WhatsApp ({numero_match})
+                                        </div>
+                                    </a>
+                                ''', unsafe_allow_html=True)
                             
                             foto_b64 = coincidencia.get('ruta_imagen', '')
                             if foto_b64 and foto_b64 != "error":
