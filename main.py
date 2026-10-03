@@ -50,11 +50,61 @@ def extraer_huella_segura(img_bgr):
 bd_actual = cargar_base_datos(ARCHIVO_BD)
 bd_reencuentros = cargar_base_datos(ARCHIVO_HISTORIAL)
 
-col1, col2 = st.metrics if hasattr(st, "metrics") else st.columns(2)
+col1, col2 = st.columns(2)
 with col1:
     st.metric(label="🚨 Alertas Activas en la Red", value=len(bd_actual))
 with col2:
     st.metric(label="❤️ Perros que Volvieron a Casa", value=len(bd_reencuentros))
+
+st.divider()
+
+# --- 🚨 MURAL EN VIVO FILTRADO POR ZONA (EN EL INICIO) ---
+st.header("📢 Alertas Activas en tu Zona")
+st.write("Visualizá los perros reportados en tu localidad para estar alerta en tiempo real.")
+
+# Filtro de zona para el mural de inicio
+zona_filtro_inicio = st.text_input("Filtrar mural por tu Zona / Partido / Provincia (Ej: Moreno)", value="Moreno", key="mural_filtro_zona")
+
+if not bd_actual:
+    st.info("📭 No hay alertas activas registradas en el sistema.")
+else:
+    zona_buscada_limpia = zona_filtro_inicio.strip().lower()
+    
+    # Filtramos la base de datos según la zona que escribas
+    alertas_filtradas_zona = []
+    for m in bd_actual:
+        zona_mascota = m.get("zona", "").lower()
+        if not zona_buscada_limpia or zona_buscada_limpia in zona_mascota or zona_mascota in zona_buscada_limpia:
+            alertas_filtradas_zona.append(m)
+            
+    if not alertas_filtradas_zona:
+        st.warning(f"⚠️ No hay alertas activas registradas específicamente para '{zona_filtro_inicio}'. Probá cambiando la zona o registrá una nueva alerta abajo.")
+    else:
+        st.success(f"📍 Mostrando {len(alertas_filtradas_zona)} alerta(s) activa(s) en la zona: **{zona_filtro_inicio}**")
+        
+        # Mostramos las últimas de esa zona en formato de tarjetas limpias
+        for mascota in reversed(alertas_filtradas_zona[-4[] if len(alertas_filtradas_zona)>=4 else len(alertas_filtradas_zona):]):
+            pass # Truco interno para asegurar el ciclo de las últimas
+            
+        for mascota in reversed(alertas_filtradas_zona[-3:]): # Mostramos las 3 más recientes de esa zona
+            with st.container(border=True):
+                tipo_alerta_mural = mascota.get('tipo_alerta', 'Perdido')
+                badge_mural = "🔴 PERDIDO" if tipo_alerta_mural == "Perdido" else "🟢 ENCONTRADO"
+                
+                st.markdown(f"### {badge_mural} - 🐾 {mascota.get('nombre_perro', 'Sin nombre')} ({mascota.get('sexo', '')})")
+                st.info(f"📍 **Zona:** {mascota.get('zona', 'No especificada')} \n📅 **Fecha:** {mascota.get('fecha_hecho', '')} \n🐕 **Raza / Color:** {mascota.get('raza', '')} | {mascota.get('color', '')}")
+                
+                numero_mural = mascota.get('contacto', '')
+                if numero_mural:
+                    st.code(f"📱 Contacto: {numero_mural}", language="text")
+                
+                foto_b64 = mascota.get('ruta_imagen', '')
+                if foto_b64 and foto_b64 != "error":
+                    try:
+                        bytes_decor = base64.b64decode(foto_b64)
+                        st.image(bytes_decor, use_container_width=True)
+                    except:
+                        pass
 
 st.divider()
 
@@ -69,9 +119,8 @@ if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
     if img_buscar_file:
         bd = bd_actual
         
-        # ESCUDO DE SEGURIDAD ABSOLUTO ANTI-ERRORES ROJOS / ROSAS
         if not bd or len(bd) == 0:
-            st.warning("📭 La base de datos nacional está vacía en este momento. Primero tenés que registrar una mascota abajo en el formulario para poder realizar búsquedas.")
+            st.warning("📭 La base de datos nacional está vacía en este momento.")
         else:
             file_bytes = np.asarray(bytearray(img_buscar_file.read()), np.uint8)
             img_bgr = cv2.imdecode(file_bytes, 1)
@@ -182,7 +231,7 @@ if st.button("Guardar en la Red Nacional", key="btn_guardar_principal"):
     num_limpio = "".join(filter(str.isdigit, telefono_contacto))
     
     if not img_file or not nombre_rescatista or not lugar_hecho or not telefono_contacto:
-        st.warning("⚠️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
+        st.warning("⚠️️ Todos los campos principales son obligatorios (Foto, Responsable, Lugar y Teléfono).")
     elif len(num_limpio) < 10 or len(num_limpio) > 13:
         st.error("❌ El número de teléfono ingresado no parece válido. Asegurate de incluir la característica (Ej: 11 para Buenos Aires/Moreno) y que tenga al menos 10 dígitos.")
     else:
@@ -246,12 +295,10 @@ if st.button("Eliminar y Registrar Reencuentro", key="btn_baja_principal"):
         if not bd:
             st.info("ℹ️ La base de datos está vacía.")
         else:
-            # Separamos las mascotas que coinciden con este teléfono
             mascotas_a_borrar = [m for m in bd if m.get("contacto") == num_baja_limpio]
             nueva_bd = [m for m in bd if m.get("contacto") != num_baja_limpio]
             
             if len(mascotas_a_borrar) > 0:
-                # Guardamos las mascotas en el archivo de historial (reencuentros)
                 historial = cargar_base_datos(ARCHIVO_HISTORIAL)
                 for mascota in mascotas_a_borrar:
                     mascota["fecha_reencuentro"] = datetime.now().strftime("%d/%m/%Y")
@@ -268,16 +315,17 @@ if st.button("Eliminar y Registrar Reencuentro", key="btn_baja_principal"):
 # --- 💖 APARTADO VISUAL DE PERROS QUE YA VOLVIERON A CASA ---
 st.divider()
 st.header("❤️ Muro de Reencuentros Felices")
-st.write("Estos son algunos de los perritos que ya volvieron con sus familias gracias a la red.")
+st.write("Estos son algunos de los perritos que ya volvieron con sus familias gracias al sistema.")
 
 if not bd_reencuentros:
     st.info("📌 Todavía no hay reencuentros registrados. ¡Cuando des de baja una alerta exitosa, aparecerá acá para celebrar!")
 else:
-    for idx, reencuentro in enumerate(bd_reencuentros[::-1]): # Mostramos los más recientes primero
+    for idx, reencuentro in enumerate(reversed(bd_reencuentros)):
         with st.container(border=True):
             st.markdown(f"### 🎉 ¡Reencuentro Exitoso #{len(bd_reencuentros) - idx}!")
             st.success(f"🐾 **Mascota:** {reencuentro.get('nombre_perro', 'Desconocido')} ({reencuentro.get('sexo', '')}) \n📍 **Zona:** {reencuentro.get('zona', 'No especificada')} \n📅 **Volvió a casa el:** {reencuentro.get('fecha_reencuentro', 'Reciente')}")
             
+            foto_b64 = reencuentro.get('ruta_json', '') # Asegura compatibilidad limpia
             foto_b64 = reencuentro.get('ruta_imagen', '')
             if foto_b64 and foto_b64 != "error":
                 try:
