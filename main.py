@@ -27,7 +27,7 @@ def cargar_base_datos(archivo):
         with open(archivo, "r", encoding="utf-8") as f:
             try:
                 contenido = f.read().strip()
-                if not contenido or contenido == "" or contenido == "[]":
+                if not contenido:
                     return []
                 f.seek(0)
                 return json.load(f)
@@ -110,14 +110,10 @@ with tab_alertas:
                 if not zona_in or not contacto_in or not foto_in:
                     st.error("⚠️ La Zona, el Teléfono de Contacto y la Foto son obligatorios para publicar.")
                 else:
-                    # Procesar la imagen para OpenCV
                     file_bytes = np.asarray(bytearray(foto_in.read()), dtype=np.uint8)
                     img_bgr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
                     
-                    # Extraer huella digital con tu motor de IA
                     huella_ia = extraer_huella_segura(img_bgr)
-                    
-                    # Convertir imagen a Base64 para guardarla en el JSON
                     foto_b64 = base64.b64encode(foto_in.getvalue()).decode('utf-8')
                     
                     nueva_mascota = {
@@ -136,7 +132,7 @@ with tab_alertas:
                     
                     bd_actual.append(nueva_mascota)
                     guardar_base_datos(bd_actual, ARCHIVO_BD)
-                    st.success("🎉 ¡Alerta registrada con éxito en el sistema federal! Ya figura en el mural y es rastreable por la IA.")
+                    st.success("🎉 ¡Alerta registrada con éxito! Ya figura en el mural y es rastreable por la IA.")
                     st.rerun()
 
     st.divider()
@@ -199,6 +195,17 @@ with tab_alertas:
                         texto_wa = urllib.parse.quote(f"Hola, vi tu reporte en Misión Mascotas sobre {nombre_mural}. ¡Quería comunicarme con vos!")
                         url_wa = f"https://wa.me{num_wa}?text={texto_wa}"
                         
-                        st.markdown(f'''
-                            <a href="{url_wa}" target="_blank" style="text-decoration: none;">
-                                <div style="background-color: #25D366; color: white; padding: 10px 15px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 15px; margin-top: 5px; margin-bottom: 10px;">
+                        # Botón nativo y seguro de Streamlit para evitar fallos de HTML/String
+                        st.link_button(f"💬 Contactar por WhatsApp ({numero_mural})", url_wa, type="primary")
+                    
+                    foto_b64 = mascota.get('ruta_imagen', '')
+                    if foto_b64 and foto_b64 != "error":
+                        try:
+                            bytes_decor = base64.b64decode(foto_b64)
+                            st.image(bytes_decor, use_container_width=True)
+                        except:
+                            pass
+
+    st.divider()
+
+    # --- BÚSQUEDA INTELIGENTE IA ---
