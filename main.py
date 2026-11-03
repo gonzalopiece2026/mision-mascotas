@@ -76,7 +76,7 @@ with st.expander("💡 Consejos útiles para la comunidad"):
 
 st.divider()
 
-# --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS DECORADAS ---
+# --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS ---
 tab_alertas, tab_adopciones, tab_reencuentros, tab_guia = st.tabs([
     "🚨🐶 Pérdidas y Hallazgos", 
     "🏡🐾 Perros en Adopción", 
@@ -207,4 +207,3 @@ with tab_alertas:
 
     st.divider()
 
-    # --- BÚSQUEDA INTELIGENTE IA ---
