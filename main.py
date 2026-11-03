@@ -50,7 +50,7 @@ def extraer_huella_segura(img_bgr):
         print(f"Error interno en matriz visual: {e}")
     return None
 
-# Carga de bases de datos
+# Carga de bases de datos de forma segura
 bd_actual = cargar_base_datos(ARCHIVO_BD)
 bd_reencuentros = cargar_base_datos(ARCHIVO_HISTORIAL)
 bd_adopciones = cargar_base_datos(ARCHIVO_ADOPCIONES)
@@ -69,7 +69,7 @@ st.divider()
 # --- 💡 CONSEJOS ÚTILES PARA LA COMUNIDAD ---
 with st.expander("💡 Consejos útiles para la comunidad"):
     st.markdown("""
-    * 💧 **Si encontraste un perro:** Dejale agua fresca, resguardalo en un lugar seguro and sacale una foto clara de frente para subirla a la red.
+    * 💧 **Si encontraste un perro:** Dejale agua fresca, resguardalo en un lugar seguro y sacale una foto clara de frente para subirla a la red.
     * 🏥 **Si se te perdió:** Avisá a veterinarias y refugios de tu zona, pegá carteles y mantené activa la alerta acá en **Misión Mascotas**.
     * 🏡 **Si vas a adoptar:** Recordá que la adopción es un compromiso responsable para toda la vida del animal.
     """)
@@ -201,5 +201,5 @@ with tab_alertas:
                             st.link_button(f"💬 WhatsApp ({numero_mural})", url_wa, type="primary")
                     
                     with col_b2:
-                        # --- GENERADOR NATIVO DE CARTEL EN PDF / IMPRESIÓN ---
                         html_titulo = "SE BUSCA" if tipo_alerta_mural == "Perdido" else "MASCOTA ENCONTRADA"
+                        html_color = "#FF0000" if tipo_alerta_mural == "Perdido" else "#00AA00"
