@@ -62,7 +62,7 @@ with col1:
 with col2:
     st.metric(label="🏡 En Adopción", value=len(bd_adopciones))
 with col3:
-    st.metric(label="❤️ Reencuentros", value=len(bd_reencuentros))
+    st.metric(label="❤️ Reencuentros Felices", value=len(bd_reencuentros))
 
 st.divider()
 
@@ -76,35 +76,35 @@ with st.expander("💡 Consejos útiles para la comunidad"):
 
 st.divider()
 
-# --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS (TABS) ---
+# --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS (TABS DECORADOS) ---
 tab_alertas, tab_adopciones, tab_reencuentros, tab_guia = st.tabs([
-    "🚨 Pérdidas y Hallazgos", 
-    "🏡 Perros en Adopción", 
-    "✨ Dar de Baja / Reencuentros",
-    "📖 ¿Cómo usar la app?"
+    "🚨🐶 Pérdidas y Hallazgos", 
+    "🏡🐾 Perros en Adopción", 
+    "✨❤️ Dar de Baja / Reencuentros",
+    "📖🐕 ¿Cómo usar la app?"
 ])
 
 # =============================================================================
-# 1️⃣ PESTAÑA: PÉRDIDAS Y HALLAZGOS (REGISTRO + MURAL + BUSCADOR)
+# 1️⃣ PESTAÑA: PÉRDIDAS Y HALLAZGOS (REGISTRO + MURAL + BUSCADOR IA)
 # =============================================================================
 with tab_alertas:
     
     # --- FORMULARIO DE CARGA PARA REGISTRAR MASCOTA ---
-    with st.expander("➕ Registrar Nueva Alerta (Pérdida o Hallazgo)", expanded=False):
+    with st.expander("➕ Registrar Nueva Alerta (Pérdida o Hallazgo) 🐾", expanded=False):
         st.write("Completá los datos de la mascota para que quede registrada en el sistema de búsqueda por IA.")
         
         with st.form("form_registro_mascota", clear_on_submit=True):
-            tipo_alerta_in = st.selectbox("Tipo de Alerta", ["Perdido", "Encontrado"])
-            nombre_in = st.text_input("Nombre del perro (Si es encontrado podés poner 'Sin Nombre')")
-            zona_in = st.text_input("Zona / Barrio / Localidad (Ej: Moreno, Las Catonas)")
-            sexo_in = st.selectbox("Sexo", ["Macho", "Hembra", "No sé"])
-            raza_in = st.text_input("Raza aproximada")
-            color_in = st.text_input("Color del pelaje")
-            fecha_hecho_in = st.date_input("¿Cuándo ocurrió?", value=obtener_ahora_argentina().date())
-            contacto_in = st.text_input("Teléfono de Contacto (Ej: 1123456789)")
-            foto_in = st.file_uploader("Subí una foto clara de la mascota", type=["jpg", "jpeg", "png", "webp"])
+            tipo_alerta_in = st.selectbox("📌 Tipo de Alerta", ["Perdido", "Encontrado"])
+            nombre_in = st.text_input("🐾 Nombre del perro (Si es encontrado podés poner 'Sin Nombre')")
+            zona_in = st.text_input("📍 Zona / Barrio / Localidad (Ej: Moreno, Las Catonas)")
+            sexo_in = st.selectbox("🧬 Sexo", ["Macho", "Hembra", "No sé"])
+            raza_in = st.text_input("🐕 Raza aproximada")
+            color_in = st.text_input("🎨 Color del pelaje")
+            fecha_hecho_in = st.date_input("📅 ¿Cuándo ocurrió?", value=obtener_ahora_argentina().date())
+            contacto_in = st.text_input("📞 Teléfono de Contacto (Ej: 1123456789)")
+            foto_in = st.file_uploader("📸 Subí una foto clara de la mascota", type=["jpg", "jpeg", "png", "webp"])
             
-            btn_guardar = st.form_submit_button("Publicar Alerta")
+            btn_guardar = st.form_submit_button("📢 Publicar Alerta en la Red")
             
             if btn_guardar:
                 if not zona_in or not contacto_in or not foto_in:
@@ -195,7 +195,6 @@ with tab_alertas:
                         texto_wa = urllib.parse.quote(f"Hola, vi tu reporte en Misión Mascotas sobre {nombre_mural}. ¡Quería comunicarme con vos!")
                         url_wa = f"https://wa.me{num_wa}?text={texto_wa}"
                         
-                        # Botón nativo y seguro de Streamlit para evitar fallos de HTML/String
                         st.link_button(f"💬 Contactar por WhatsApp ({numero_mural})", url_wa, type="primary")
                     
                     foto_b64 = mascota.get('ruta_imagen', '')
