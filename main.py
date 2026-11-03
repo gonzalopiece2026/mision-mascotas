@@ -180,7 +180,7 @@ with tab_alertas:
             
             for mascota in reversed(alertas_filtradas_zona):
                 with st.container(border=True):
-                    tipo_alerta_mural = mascota.get('tipo_alerta', 'Perdido')
+                    tipo_alerta_mural = m.get('tipo_alerta', 'Perdido') if 'm' in locals() and isinstance(m, dict) else mascota.get('tipo_alerta', 'Perdido')
                     badge_mural = "🔴 PERDIDO" if tipo_alerta_mural == "Perdido" else "🟢 ENCONTRADO"
                     nombre_mural = mascota.get('nombre_perro', 'Sin nombre')
                     
@@ -204,6 +204,4 @@ with tab_alertas:
                             st.image(bytes_decor, use_container_width=True)
                         except:
                             pass
-
-    st.divider()
 
