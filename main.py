@@ -50,7 +50,7 @@ def extraer_huella_segura(img_bgr):
         print(f"Error interno en matriz visual: {e}")
     return None
 
-# Carga de bases de datos de forma segura
+# Carga de bases de datos
 bd_actual = cargar_base_datos(ARCHIVO_BD)
 bd_reencuentros = cargar_base_datos(ARCHIVO_HISTORIAL)
 bd_adopciones = cargar_base_datos(ARCHIVO_ADOPCIONES)
@@ -76,7 +76,7 @@ with st.expander("💡 Consejos útiles para la comunidad"):
 
 st.divider()
 
-# --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS (TABS DECORADOS) ---
+# --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS ---
 tab_alertas, tab_adopciones, tab_reencuentros, tab_guia = st.tabs([
     "🚨🐶 Pérdidas y Hallazgos", 
     "🏡🐾 Perros en Adopción", 
@@ -133,7 +133,7 @@ with tab_alertas:
                     
                     bd_actual.append(nueva_mascota)
                     guardar_base_datos(bd_actual, ARCHIVO_BD)
-                    st.success("🎉 ¡Alerta registrada con éxito! Ya figura en el mural y es rastreable por la IA.")
+                    st.success("🎉 ¡Alerta registrada con éxito! Ya figura en el mural.")
                     st.rerun()
 
     st.divider()
@@ -187,19 +187,24 @@ with tab_alertas:
                     st.markdown(f"### {badge_mural} - 🐾 {nombre_mural} ({mascota.get('sexo', '')})")
                     st.info(f"📍 **Zona:** {mascota.get('zona', 'No especificada')} \n📅 **Ocurrió el:** {mascota.get('fecha_hecho', 'No especificada')} \n🕒 **Publicado:** {mascota.get('fecha_subida', 'Recientemente')} \n🐕 **Raza / Color:** {mascota.get('raza', '')} | {mascota.get('color', '')}")
                     
-                    col_b1, col_b2 = st.columns(2)
+                    numero_mural = mascota.get('contacto', '')
+                    if numero_mural:
+                        num_wa = "".join(filter(str.isdigit, numero_mural))
+                        if num_wa and not num_wa.startswith("54"):
+                            num_wa = "549" + num_wa
+                        
+                        texto_wa = urllib.parse.quote(f"Hola, vi tu reporte en Misión Mascotas sobre {nombre_mural}. ¡Quería comunicarme con vos!")
+                        url_wa = f"https://wa.me{num_wa}?text={texto_wa}"
+                        st.link_button(f"💬 WhatsApp ({numero_mural})", url_wa, type="primary")
                     
-                    with col_b1:
-                        numero_mural = mascota.get('contacto', '')
-                        if numero_mural:
-                            num_wa = "".join(filter(str.isdigit, numero_mural))
-                            if num_wa and not num_wa.startswith("54"):
-                                num_wa = "549" + num_wa
-                            
-                            texto_wa = urllib.parse.quote(f"Hola, vi tu reporte en Misión Mascotas sobre {nombre_mural}. ¡Quería comunicarme con vos!")
-                            url_wa = f"https://wa.me{num_wa}?text={texto_wa}"
-                            st.link_button(f"💬 WhatsApp ({numero_mural})", url_wa, type="primary")
-                    
-                    with col_b2:
-                        html_titulo = "SE BUSCA" if tipo_alerta_mural == "Perdido" else "MASCOTA ENCONTRADA"
-                        html_color = "#FF0000" if tipo_alerta_mural == "Perdido" else "#00AA00"
+                    # RENDERIZADO NATIVO DE LA IMAGEN GUARDADA
+                    foto_b64 = mascota.get('ruta_imagen', '')
+                    if foto_b64 and foto_b64 != "error":
+                        try:
+                            bytes_decor = base64.b64decode(foto_b64)
+                            st.image(bytes_decor, use_container_width=True)
+                        except:
+                            pass
+
+    st.divider()
+
