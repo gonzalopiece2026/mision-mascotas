@@ -101,7 +101,7 @@ with tab_alertas:
             raza_in = st.text_input("🐕 Raza aproximada")
             color_in = st.text_input("🎨 Color del pelaje")
             fecha_hecho_in = st.date_input("📅 ¿Cuándo ocurrió?", value=obtener_ahora_argentina().date())
-            contacto_in = st.text_input("📞 Teléfono de Contacto (Ej: 1123456789)")
+            contacto_in = st.text_input("📞 Teléfono de Contacto (Solo números, Ej: 1123456789)")
             foto_in = st.file_uploader("📸 Subí una foto clara de la mascota", type=["jpg", "jpeg", "png", "webp"])
             
             btn_guardar = st.form_submit_button("📢 Publicar Alerta en la Red")
@@ -117,6 +117,7 @@ with tab_alertas:
                     foto_b64 = base64.b64encode(foto_in.getvalue()).decode('utf-8')
                     
                     nueva_mascota = {
+                        "id_caso": str(int(obtener_ahora_argentina().timestamp())),
                         "tipo_alerta": tipo_alerta_in,
                         "nombre_perro": nombre_in if nombre_in else "Sin nombre",
                         "zona": zona_in,
@@ -125,7 +126,7 @@ with tab_alertas:
                         "color": color_in,
                         "fecha_hecho": fecha_hecho_in.strftime("%d/%m/%Y"),
                         "fecha_subida": obtener_ahora_argentina().strftime("%d/%m/%Y %H:%M"),
-                        "contacto": contacto_in,
+                        "contacto": contacto_in.strip(),
                         "ruta_imagen": foto_b64,
                         "huella_visual": huella_ia
                     }
@@ -144,7 +145,7 @@ with tab_alertas:
     col_filtro1, col_filtro2 = st.columns(2)
     with col_filtro1:
         zona_filtro_inicio = st.text_input("📍 Filtrar por Zona / Partido / Provincia", value="Moreno", key="mural_filtro_zona")
-    with col_filtro2:
+    with col_filtro2 = col_filtro2:
         fecha_desde_filtro = st.date_input("📅 Mostrar alertas OCURRIDAS desde el día:", value=obtener_ahora_argentina().date() - timedelta(days=30), key="mural_filtro_fecha")
 
     if not bd_actual:
@@ -203,8 +204,3 @@ with tab_alertas:
                             bytes_decor = base64.b64decode(foto_b64)
                             st.image(bytes_decor, use_container_width=True)
                         except:
-                            pass
-
-    st.divider()
-
-    # --- BÚSQUEDA INTELIGENTE IA ---
