@@ -207,4 +207,3 @@ with tab_alertas:
 
     st.divider()
 
-    # --- BÚSQUEDA INTELIGENTE IA ---
