@@ -69,7 +69,7 @@ st.divider()
 # --- 💡 CONSEJOS ÚTILES PARA LA COMUNIDAD ---
 with st.expander("💡 Consejos útiles para la comunidad"):
     st.markdown("""
-    * 💧 **Si encontraste un perro:** Dejale agua fresca, resguardalo en un lugar seguro y sacale una foto clara de frente para subirla a la red.
+    * 💧 **Si encontraste un perro:** Dejale agua fresca, resguardalo en un lugar seguro and sacale una foto clara de frente para subirla a la red.
     * 🏥 **Si se te perdió:** Avisá a veterinarias y refugios de tu zona, pegá carteles y mantené activa la alerta acá en **Misión Mascotas**.
     * 🏡 **Si vas a adoptar:** Recordá que la adopción es un compromiso responsable para toda la vida del animal.
     """)
@@ -187,22 +187,19 @@ with tab_alertas:
                     st.markdown(f"### {badge_mural} - 🐾 {nombre_mural} ({mascota.get('sexo', '')})")
                     st.info(f"📍 **Zona:** {mascota.get('zona', 'No especificada')} \n📅 **Ocurrió el:** {mascota.get('fecha_hecho', 'No especificada')} \n🕒 **Publicado:** {mascota.get('fecha_subida', 'Recientemente')} \n🐕 **Raza / Color:** {mascota.get('raza', '')} | {mascota.get('color', '')}")
                     
-                    numero_mural = mascota.get('contacto', '')
-                    if numero_mural:
-                        num_wa = "".join(filter(str.isdigit, numero_mural))
-                        if num_wa and not num_wa.startswith("54"):
-                            num_wa = "549" + num_wa
-                        
-                        texto_wa = urllib.parse.quote(f"Hola, vi tu reporte en Misión Mascotas sobre {nombre_mural}. ¡Quería comunicarme con vos!")
-                        url_wa = f"https://wa.me{num_wa}?text={texto_wa}"
-                        
-                        st.link_button(f"💬 Contactar por WhatsApp ({numero_mural})", url_wa, type="primary")
+                    col_b1, col_b2 = st.columns(2)
                     
-                    foto_b64 = mascota.get('ruta_imagen', '')
-                    if foto_b64 and foto_b64 != "error":
-                        try:
-                            bytes_decor = base64.b64decode(foto_b64)
-                            st.image(bytes_decor, use_container_width=True)
-                        except:
-                            pass
-
+                    with col_b1:
+                        numero_mural = mascota.get('contacto', '')
+                        if numero_mural:
+                            num_wa = "".join(filter(str.isdigit, numero_mural))
+                            if num_wa and not num_wa.startswith("54"):
+                                num_wa = "549" + num_wa
+                            
+                            texto_wa = urllib.parse.quote(f"Hola, vi tu reporte en Misión Mascotas sobre {nombre_mural}. ¡Quería comunicarme con vos!")
+                            url_wa = f"https://wa.me{num_wa}?text={texto_wa}"
+                            st.link_button(f"💬 WhatsApp ({numero_mural})", url_wa, type="primary")
+                    
+                    with col_b2:
+                        # --- GENERADOR NATIVO DE CARTEL EN PDF / IMPRESIÓN ---
+                        html_titulo = "SE BUSCA" if tipo_alerta_mural == "Perdido" else "MASCOTA ENCONTRADA"
