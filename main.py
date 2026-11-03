@@ -145,7 +145,7 @@ with tab_alertas:
     col_filtro1, col_filtro2 = st.columns(2)
     with col_filtro1:
         zona_filtro_inicio = st.text_input("📍 Filtrar por Zona / Partido / Provincia", value="Moreno", key="mural_filtro_zona")
-    with col_filtro2 = col_filtro2:
+    with col_filtro2:
         fecha_desde_filtro = st.date_input("📅 Mostrar alertas OCURRIDAS desde el día:", value=obtener_ahora_argentina().date() - timedelta(days=30), key="mural_filtro_fecha")
 
     if not bd_actual:
@@ -204,3 +204,5 @@ with tab_alertas:
                             bytes_decor = base64.b64decode(foto_b64)
                             st.image(bytes_decor, use_container_width=True)
                         except:
+                            pass
+
