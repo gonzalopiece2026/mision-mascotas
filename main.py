@@ -76,7 +76,7 @@ with st.expander("💡 Consejos útiles para la comunidad"):
 
 st.divider()
 
-# --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS ---
+# --- 📌 NAVEGACIÓN PRINCIPAL POR PESTAÑAS DECORADAS ---
 tab_alertas, tab_adopciones, tab_reencuentros, tab_guia = st.tabs([
     "🚨🐶 Pérdidas y Hallazgos", 
     "🏡🐾 Perros en Adopción", 
@@ -197,7 +197,6 @@ with tab_alertas:
                         url_wa = f"https://wa.me{num_wa}?text={texto_wa}"
                         st.link_button(f"💬 WhatsApp ({numero_mural})", url_wa, type="primary")
                     
-                    # RENDERIZADO NATIVO DE LA IMAGEN GUARDADA
                     foto_b64 = mascota.get('ruta_imagen', '')
                     if foto_b64 and foto_b64 != "error":
                         try:
@@ -208,3 +207,4 @@ with tab_alertas:
 
     st.divider()
 
+    # --- BÚSQUEDA INTELIGENTE IA ---
