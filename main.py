@@ -6,7 +6,6 @@ import urllib.parse
 from datetime import datetime, timedelta
 import numpy as np
 import streamlit as st
-import requests
 from sklearn.metrics.pairwise import cosine_similarity
 
 # --- FUNCIÓN AUXILIAR PARA FECHA Y HORA OFICIAL ARGENTINA (UTC-3) ---
@@ -28,7 +27,7 @@ def cargar_base_datos(archivo):
         with open(archivo, "r", encoding="utf-8") as f:
             try:
                 contenido = f.read().strip()
-                if not contenido or contenido == "[]":
+                if not contenido or contenido == "" or contenido == "[]":
                     return []
                 f.seek(0)
                 return json.load(f)
@@ -86,9 +85,63 @@ tab_alertas, tab_adopciones, tab_reencuentros, tab_guia = st.tabs([
 ])
 
 # =============================================================================
-# 1️⃣ PESTAÑA: PÉRDIDAS Y HALLAZGOS (BUSCADOR + REGISTRO + MURAL)
+# 1️⃣ PESTAÑA: PÉRDIDAS Y HALLAZGOS (REGISTRO + MURAL + BUSCADOR)
 # =============================================================================
 with tab_alertas:
+    
+    # --- FORMULARIO DE CARGA PARA REGISTRAR MASCOTA ---
+    with st.expander("➕ Registrar Nueva Alerta (Pérdida o Hallazgo)", expanded=False):
+        st.write("Completá los datos de la mascota para que quede registrada en el sistema de búsqueda por IA.")
+        
+        with st.form("form_registro_mascota", clear_on_submit=True):
+            tipo_alerta_in = st.selectbox("Tipo de Alerta", ["Perdido", "Encontrado"])
+            nombre_in = st.text_input("Nombre del perro (Si es encontrado podés poner 'Sin Nombre')")
+            zona_in = st.text_input("Zona / Barrio / Localidad (Ej: Moreno, Las Catonas)")
+            sexo_in = st.selectbox("Sexo", ["Macho", "Hembra", "No sé"])
+            raza_in = st.text_input("Raza aproximada")
+            color_in = st.text_input("Color del pelaje")
+            fecha_hecho_in = st.date_input("¿Cuándo ocurrió?", value=obtener_ahora_argentina().date())
+            contacto_in = st.text_input("Teléfono de Contacto (Ej: 1123456789)")
+            foto_in = st.file_uploader("Subí una foto clara de la mascota", type=["jpg", "jpeg", "png", "webp"])
+            
+            btn_guardar = st.form_submit_button("Publicar Alerta")
+            
+            if btn_guardar:
+                if not zona_in or not contacto_in or not foto_in:
+                    st.error("⚠️ La Zona, el Teléfono de Contacto y la Foto son obligatorios para publicar.")
+                else:
+                    # Procesar la imagen para OpenCV
+                    file_bytes = np.asarray(bytearray(foto_in.read()), dtype=np.uint8)
+                    img_bgr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+                    
+                    # Extraer huella digital con tu motor de IA
+                    huella_ia = extraer_huella_segura(img_bgr)
+                    
+                    # Convertir imagen a Base64 para guardarla en el JSON
+                    foto_b64 = base64.b64encode(foto_in.getvalue()).decode('utf-8')
+                    
+                    nueva_mascota = {
+                        "tipo_alerta": tipo_alerta_in,
+                        "nombre_perro": nombre_in if nombre_in else "Sin nombre",
+                        "zona": zona_in,
+                        "sexo": sexo_in,
+                        "raza": raza_in,
+                        "color": color_in,
+                        "fecha_hecho": fecha_hecho_in.strftime("%d/%m/%Y"),
+                        "fecha_subida": obtener_ahora_argentina().strftime("%d/%m/%Y %H:%M"),
+                        "contacto": contacto_in,
+                        "ruta_imagen": foto_b64,
+                        "huella_visual": huella_ia
+                    }
+                    
+                    bd_actual.append(nueva_mascota)
+                    guardar_base_datos(bd_actual, ARCHIVO_BD)
+                    st.success("🎉 ¡Alerta registrada con éxito en el sistema federal! Ya figura en el mural y es rastreable por la IA.")
+                    st.rerun()
+
+    st.divider()
+
+    # --- MURAL DE ALERTAS ACTIVAS ---
     st.header("📢 Alertas Activas en tu Zona")
     st.write("Visualizá los perros reportados en tu localidad filtrando por zona y fecha del suceso.")
 
@@ -128,7 +181,6 @@ with tab_alertas:
         else:
             st.success(f"📍 Mostrando {len(alertas_filtradas_zona)} alerta(s) activa(s) en **{zona_filtro_inicio}**")
             
-            # Recorremos la lista invertida para mostrar siempre lo más nuevo primero sin recortar datos
             for mascota in reversed(alertas_filtradas_zona):
                 with st.container(border=True):
                     tipo_alerta_mural = mascota.get('tipo_alerta', 'Perdido')
@@ -150,56 +202,3 @@ with tab_alertas:
                         st.markdown(f'''
                             <a href="{url_wa}" target="_blank" style="text-decoration: none;">
                                 <div style="background-color: #25D366; color: white; padding: 10px 15px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 15px; margin-top: 5px; margin-bottom: 10px;">
-                                    💬 Contactar por WhatsApp ({numero_mural})
-                                </div>
-                            </a>
-                        ''', unsafe_allow_html=True)
-                    
-                    foto_b64 = mascota.get('ruta_imagen', '')
-                    if foto_b64 and foto_b64 != "error":
-                        try:
-                            bytes_decor = base64.b64decode(foto_b64)
-                            st.image(bytes_decor, use_container_width=True)
-                        except:
-                            pass
-
-    st.divider()
-
-    # --- BÚSQUEDA INTELIGENTE IA ---
-    st.header("🔎 Buscar Coincidencias Inteligentes con IA")
-    st.write("Subí la foto para buscar cruce por reconocimiento visual.")
-    img_buscar_file = st.file_uploader("Subí la foto para buscar", type=["jpg", "jpeg", "png", "webp"], key="bus_img")
-    zona_busqueda_input = st.text_input("Zona, Barrio o Provincia donde buscás", key="bus_zona")
-    sexo_busqueda_input = st.selectbox("Sexo del perro que buscás", ["Cualquiera / No sé", "Macho", "Hembra"], key="bus_sexo")
-
-    if st.button("Buscar Coincidencias con IA", key="btn_buscar_principal"):
-        if img_buscar_file:
-            if not bd_actual:
-                st.info("📭 No hay alertas en la base de datos para comparar.")
-            else:
-                # Procesar la imagen subida para la búsqueda
-                file_bytes = np.asarray(bytearray(img_buscar_file.read()), dtype=np.uint8)
-                img_bgr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-                huella_buscada = extraer_huella_segura(img_bgr)
-                
-                if huella_buscada is None:
-                    st.error("⚠️ No se pudo procesar la imagen de búsqueda. Intentá con otra.")
-                else:
-                    resultados_compatibles = []
-                    
-                    for mascota in bd_actual:
-                        # Filtro opcional por Sexo
-                        if sexo_busqueda_input != "Cualquiera / No sé":
-                            if mascota.get("sexo", "").lower() != sexo_busqueda_input.lower():
-                                continue
-                        
-                        # Filtro opcional por Zona (Búsqueda cruzada flexible)
-                        zona_mascota = mascota.get("zona", "").lower()
-                        zona_buscada = zona_busqueda_input.strip().lower()
-                        if zona_buscada and (zona_buscada not in zona_mascota and zona_mascota not in zona_buscada):
-                            continue
-                            
-                        # Comparación de huella visual usando Similitud Coseno
-                        huella_mascota = mascota.get("huella_visual")
-                        if huella_mascota:
-                            similitud = cosine_similarity([huella_buscada], [huella_mascota])[0][0]
